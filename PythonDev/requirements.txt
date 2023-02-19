@@ -1,0 +1,6 @@
+numpy
+transformers
+transformers[onnx]
+onnx
+onnxruntime
+torch
