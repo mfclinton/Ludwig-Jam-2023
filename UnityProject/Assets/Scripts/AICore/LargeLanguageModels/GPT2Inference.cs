@@ -233,17 +233,21 @@ namespace AICore
         /// <summary>
         /// Takes a probability distribution of words, and samples from it
         /// </summary>
-        public static string SampleWord(List<(float, string)> wordProbs)
+        public static (float, string) SampleWord(List<(float, string)> wordProbs, float totalProb = 1f)
         {
             float cummProb = 0f;
-            float rng = UnityEngine.Random.value;
+            float rng = UnityEngine.Random.Range(0, totalProb);
 
-            foreach ((float prob, string word) in wordProbs)
+            for(int i = 0; i < wordProbs.Count; i++)
             {
+                (float prob, string word) = wordProbs[i];
                 cummProb += prob;
 
                 if (rng <= cummProb)
-                    return word;
+                {
+                    wordProbs.RemoveAt(i); // TODO: Validate
+                    return (prob, word);
+                }
             }
 
             throw new Exception("Probability Distribution Not Normalized");

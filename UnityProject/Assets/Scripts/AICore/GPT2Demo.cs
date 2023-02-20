@@ -26,7 +26,7 @@ public class GPT2Demo : MonoBehaviour
         for (int i = 0; i < n; i++)
         {
             var wordProbs = AICore.GPT2Inference.RecommendedNextWords(session, tokenizer, testInput, 3);
-            string word = AICore.GPT2Inference.SampleWord(wordProbs);
+            (float p, string word) = AICore.GPT2Inference.SampleWord(wordProbs);
             testInput += word;
         }
 
