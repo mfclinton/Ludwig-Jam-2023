@@ -170,7 +170,7 @@ namespace AICore
         /// <summary>
         /// Constructs the next n most likely tokens in a sequence given an input string
         /// </summary>
-        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches, float sensitivity = 0.1f)
+        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches, float sensitivity = 0.1f, int maxWordCount = 20)
         {
             List<(float, string)> completedWords = new List<(float, string)>();
             Queue<(float, string)> queuedWords = new Queue<(float, string)>();
@@ -183,7 +183,7 @@ namespace AICore
             List<(float, int)> probs = CalculateProbs(orderedZipped);
             probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
 
-            while (queuedWords.Count() != 0)
+            while (queuedWords.Count() != 0 && completedWords.Count < maxWordCount)
             {
                 (float p, string chunk) = queuedWords.Dequeue();
                     
@@ -197,8 +197,8 @@ namespace AICore
                 long[] temp = new long[1];
                 foreach ((float prob, int index) in probs)
                 {
-                    //if (index == GPT2Inference.EOS_TOKEN)
-                    //    continue;
+                    if (index == GPT2Inference.EOS_TOKEN)
+                        continue;
 
                     temp[0] = index;
                     string newChunk = tokenizer.Decode(temp);
