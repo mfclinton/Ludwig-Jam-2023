@@ -5,7 +5,6 @@ using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using System;
 using System.Linq;
-using TMPro;
 using AICore;
 
 public class GPT2Demo : MonoBehaviour
@@ -22,7 +21,7 @@ public class GPT2Demo : MonoBehaviour
         var tokenizer = new GPT2Tokenizer();
         string testInput = "The brown fox jumped over the";
 
-        int n = 5;
+        int n = 10;
 
         for (int i = 0; i < n; i++)
         {
