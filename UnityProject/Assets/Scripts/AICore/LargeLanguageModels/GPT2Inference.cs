@@ -66,11 +66,20 @@ namespace AICore
         /// <summary>
         /// Softmaxes the `orderedZipped` list into probabilities 
         /// </summary>
-        static List<(float, int)> CalculateProbs(List<(float, int)> orderedZipped)
+        static List<(float, int)> CalculateProbs(List<(float, int)> orderedZipped, float temperature = 1)
         {
             float max = orderedZipped.Max(tup => tup.Item1);
-            float normalizer = orderedZipped.Select(tup => Mathf.Exp(tup.Item1 - max)).Sum();
-            List<(float, int)> probs = orderedZipped.Select(tup => (Mathf.Exp(tup.Item1 - max) / normalizer, tup.Item2)).ToList();
+            float normalizer = orderedZipped.Select(tup => Mathf.Exp((tup.Item1 - max) / temperature)).Sum();
+            List<(float, int)> probs = orderedZipped.Select(tup => (Mathf.Exp((tup.Item1 - max) / temperature) / normalizer, tup.Item2)).ToList();
+
+            return probs;
+        }
+
+        static List<(float, string)> CalculateProbs(List<(float, string)> orderedZipped, float temperature = 1)
+        {
+            float max = orderedZipped.Max(tup => tup.Item1);
+            float normalizer = orderedZipped.Select(tup => Mathf.Exp((tup.Item1 - max) / temperature)).Sum();
+            List<(float, string)> probs = orderedZipped.Select(tup => (Mathf.Exp((tup.Item1 - max) / temperature) / normalizer, tup.Item2)).ToList();
 
             return probs;
         }
@@ -154,6 +163,61 @@ namespace AICore
             }
 
             return newWord;
+        }
+
+        /// <summary>
+        /// Constructs the next n most likely tokens in a sequence given an input string
+        /// </summary>
+        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches)
+        {
+            List<(float, string)> completedWords = new List<(float, string)>();
+            Queue<(float, string)> queuedWords = new Queue<(float, string)>();
+
+            List<long> encodedInputSeq = tokenizer.Encode(input).ToList();
+            float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
+            List<(float, int)> orderedZipped = ProcessLogits(logits);
+
+            TopK(orderedZipped, branches);
+            List<(float, int)> probs = CalculateProbs(orderedZipped);
+            probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
+
+            while (queuedWords.Count() != 0)
+            {
+                (float p, string chunk) = queuedWords.Dequeue();
+                    
+                encodedInputSeq = tokenizer.Encode(input + chunk).ToList();
+                logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
+                orderedZipped = ProcessLogits(logits);
+                    
+                TopK(orderedZipped, branches);
+                probs = CalculateProbs(orderedZipped);
+
+                long[] temp = new long[1];
+                foreach ((float prob, int index) in probs)
+                {
+                    temp[0] = index;
+                    string newChunk = tokenizer.Decode(temp);
+                    string newWord = chunk + newChunk;
+
+                    if (newChunk.StartsWith(" "))
+                    {
+                        completedWords.Add((p * prob, chunk));
+                    }
+                    else if (newWord.EndsWith(" ") || newWord.EndsWith("."))
+                    {
+                        completedWords.Add((p * prob, newWord));
+                    }
+                    else
+                    {
+                        queuedWords.Enqueue((p * prob, newWord));
+                    }
+                }
+            }
+
+            SortedDictionary<string, float> setOfWordProbs = new SortedDictionary<string, float>();
+            completedWords.ForEach(x => setOfWordProbs[x.Item2] = x.Item1);
+            List<(float, string)> wordProbs = CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), 0.5f);
+            return wordProbs;
         }
     }
 

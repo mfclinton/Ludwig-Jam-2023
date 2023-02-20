@@ -22,15 +22,7 @@ public class GPT2Demo : MonoBehaviour
         var tokenizer = new GPT2Tokenizer();
         string testInput = "The brown fox jumped over the";
 
-        int n = 10;
-
-        for (int i = 0; i < n; i++)
-        {
-            string inferenceResult = AICore.GPT2Inference.NextWordPrediction(session, tokenizer, testInput);
-            Debug.Log(inferenceResult);
-            testInput += inferenceResult;
-        }
-        Debug.Log(testInput);
+        AICore.GPT2Inference.RecommendedNextWords(session, tokenizer, testInput, 3);
     }
 
     void Update()
