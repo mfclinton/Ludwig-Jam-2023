@@ -10,7 +10,6 @@ namespace AICore
 {
     public class GPT2Inference
     {
-
         /// <summary>
         /// Causal Language Model Prediction
         /// Takes in a ONNX Inference session, tokenizer class, and encoded context
@@ -48,8 +47,7 @@ namespace AICore
         }
 
         /// <summary>
-        /// Constructs an output string, given an input string, using top p and top k decoding.
-        /// Also requires the inference session and tokenizer.
+        /// Constructs the next n most likely tokens in a sequence given an input string
         /// </summary>
         public static string CausalLMDefaultGeneration(InferenceSession session, Tokenizer tokenizer, string input, int n)
         {
@@ -68,6 +66,44 @@ namespace AICore
             string result = tokenizer.Decode(encodedInputSeq.ToArray());
             return result;
         }
+
+        /// <summary>
+        /// Constructs the next word / finishes the last word in a sequence
+        /// </summary>
+        public static string NextWordPrediction(InferenceSession session, Tokenizer tokenizer, string input)
+        {
+            List<long> encodedInputSeq = tokenizer.Encode(input).ToList();
+            string newWord = "";
+
+            int MAX_CHUNKS = 5;
+            for (int i = 0; i < MAX_CHUNKS; i++)
+            {
+                float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
+                int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
+                IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
+                List<(float, int)> orderedZipped = zipped.OrderByDescending(tup => tup.Item1).ToList();
+
+                long token = orderedZipped[0].Item2;                
+                string chunk = tokenizer.Decode(new long[] { token });
+
+                if (newWord.Length != 0 && (chunk.StartsWith(" ") || chunk.StartsWith(".")))
+                {
+                    Debug.Log("Exited Before Updating Word");
+                    break;
+                }
+
+                encodedInputSeq.Add(token);
+                newWord += chunk;
+                if (newWord.EndsWith(" ") || newWord.EndsWith("."))
+                {
+                    Debug.Log("Exited After Updating Word");
+                    break;
+                }
+            }
+
+            return newWord;
+        }
+
     }
 
    

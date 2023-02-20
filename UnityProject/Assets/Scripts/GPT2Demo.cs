@@ -20,12 +20,17 @@ public class GPT2Demo : MonoBehaviour
         var session = new InferenceSession(modelPath);
 
         var tokenizer = new GPT2Tokenizer();
-        string testInput = "The brown fox jumped over the ur";
+        string testInput = "The brown fox jumped over the";
 
         int n = 10;
 
-        string inferenceResult = AICore.GPT2Inference.CausalLMDefaultGeneration(session, tokenizer, testInput, n);
-        Debug.Log(inferenceResult);
+        for (int i = 0; i < n; i++)
+        {
+            string inferenceResult = AICore.GPT2Inference.NextWordPrediction(session, tokenizer, testInput);
+            Debug.Log(inferenceResult);
+            testInput += inferenceResult;
+        }
+        Debug.Log(testInput);
     }
 
     void Update()
