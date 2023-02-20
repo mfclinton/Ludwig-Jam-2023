@@ -43,3 +43,7 @@
     ```
 
 5. Install PyTorch. See [PyTorch's website](https://pytorch.org/get-started/locally/) for instructions for your platform.
+
+# Sprite References
+
+- https://www.pinterest.com/pin/619315386248540791/ (Temp Cat Paw)
