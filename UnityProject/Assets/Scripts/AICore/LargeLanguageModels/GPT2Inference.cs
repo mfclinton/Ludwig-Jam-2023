@@ -10,6 +10,8 @@ namespace AICore
 {
     public class GPT2Inference
     {
+        static long EOS_TOKEN = 50256;
+
         /// <summary>
         /// Causal Language Model Prediction
         /// Takes in a ONNX Inference session, tokenizer class, and encoded context
@@ -168,7 +170,7 @@ namespace AICore
         /// <summary>
         /// Constructs the next n most likely tokens in a sequence given an input string
         /// </summary>
-        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches)
+        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches, float sensitivity = 0.1f)
         {
             List<(float, string)> completedWords = new List<(float, string)>();
             Queue<(float, string)> queuedWords = new Queue<(float, string)>();
@@ -195,6 +197,9 @@ namespace AICore
                 long[] temp = new long[1];
                 foreach ((float prob, int index) in probs)
                 {
+                    //if (index == GPT2Inference.EOS_TOKEN)
+                    //    continue;
+
                     temp[0] = index;
                     string newChunk = tokenizer.Decode(temp);
                     string newWord = chunk + newChunk;
@@ -215,9 +220,33 @@ namespace AICore
             }
 
             SortedDictionary<string, float> setOfWordProbs = new SortedDictionary<string, float>();
-            completedWords.ForEach(x => setOfWordProbs[x.Item2] = x.Item1);
-            List<(float, string)> wordProbs = CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), 0.5f);
+            completedWords.ForEach(x => {
+                if (!setOfWordProbs.ContainsKey(x.Item2))
+                    setOfWordProbs[x.Item2] = x.Item1;
+                else
+                    setOfWordProbs[x.Item2] += x.Item1;
+            });
+            List<(float, string)> wordProbs = CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), sensitivity);
             return wordProbs;
+        }
+
+        /// <summary>
+        /// Takes a probability distribution of words, and samples from it
+        /// </summary>
+        public static string SampleWord(List<(float, string)> wordProbs)
+        {
+            float cummProb = 0f;
+            float rng = UnityEngine.Random.value;
+
+            foreach ((float prob, string word) in wordProbs)
+            {
+                cummProb += prob;
+
+                if (rng <= cummProb)
+                    return word;
+            }
+
+            throw new Exception("Probability Distribution Not Normalized");
         }
     }
 
