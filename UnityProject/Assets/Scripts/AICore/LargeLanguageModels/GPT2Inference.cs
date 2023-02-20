@@ -46,6 +46,62 @@ namespace AICore
             return logits;
         }
 
+        static List<(float, int)> ProcessLogits(float[] logits)
+        {
+            int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
+            IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
+            List<(float, int)> orderedZipped = zipped.OrderByDescending(tup => tup.Item1).ToList();
+
+            return orderedZipped;
+        }
+
+        /// <summary>
+        /// Modifies the `orderedZipped` list in place, leaving only the topK tokens
+        /// </summary>
+        static void TopK(List<(float, int)> orderedZipped, int topK)
+        {
+            orderedZipped.RemoveRange(topK, orderedZipped.Count() - topK);
+        }
+
+        /// <summary>
+        /// Softmaxes the `orderedZipped` list into probabilities 
+        /// </summary>
+        static List<(float, int)> CalculateProbs(List<(float, int)> orderedZipped)
+        {
+            float max = orderedZipped.Max(tup => tup.Item1);
+            float normalizer = orderedZipped.Select(tup => Mathf.Exp(tup.Item1 - max)).Sum();
+            List<(float, int)> probs = orderedZipped.Select(tup => (Mathf.Exp(tup.Item1 - max) / normalizer, tup.Item2)).ToList();
+
+            return probs;
+        }
+
+        /// <summary>
+        /// Modifies the `orderedZipped` list in place, leaving only the topP percent of tokens
+        /// </summary>
+        static void TopP(List<(float, int)> orderedZipped, float topP)
+        {
+            if (topP == 1f)
+                return;
+
+            List<(float, int)> probs = CalculateProbs(orderedZipped);
+
+            float cummProb = 0f;
+            int index = 0;
+            foreach ((float prob, int idx) in probs)
+            {
+                cummProb += prob;
+                index++;
+
+                if (topP <= cummProb)
+                    break;
+            }
+
+            if (index != orderedZipped.Count())
+            {
+                orderedZipped.RemoveRange(index, orderedZipped.Count() - index);
+            }
+        }
+
         /// <summary>
         /// Constructs the next n most likely tokens in a sequence given an input string
         /// </summary>
@@ -56,9 +112,7 @@ namespace AICore
             for (int i = 0; i < n; i++)
             {
                 float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
-                int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
-                IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
-                List<(float, int)> orderedZipped = zipped.OrderByDescending(tup => tup.Item1).ToList();
+                List<(float, int)> orderedZipped = ProcessLogits(logits);
 
                 encodedInputSeq.Add(orderedZipped[0].Item2);
             }
@@ -79,9 +133,7 @@ namespace AICore
             for (int i = 0; i < MAX_CHUNKS; i++)
             {
                 float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
-                int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
-                IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
-                List<(float, int)> orderedZipped = zipped.OrderByDescending(tup => tup.Item1).ToList();
+                List<(float, int)> orderedZipped = ProcessLogits(logits);
 
                 long token = orderedZipped[0].Item2;                
                 string chunk = tokenizer.Decode(new long[] { token });
@@ -103,7 +155,6 @@ namespace AICore
 
             return newWord;
         }
-
     }
 
    
