@@ -1,5 +1,6 @@
 # Transformers
-UnityProject/Assets/StreamingAssets/AIModels/LLMs/GPTDecoders/GPT2OpenAI/*
+*.onnx
+*.onnx.meta
 
 # Visual Studio Code
 .vscode/
