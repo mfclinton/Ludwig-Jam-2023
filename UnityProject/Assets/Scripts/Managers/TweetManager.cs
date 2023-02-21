@@ -5,6 +5,7 @@ using UnityEngine;
 using AICore;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using MathUtils;
 
 public class TweetManager : MonoBehaviour
 {
@@ -49,7 +50,7 @@ public class TweetManager : MonoBehaviour
         float totalProb = 1f;
         for (int i = 0; i < numSuggestions; i++)
         {
-            (float prob, string word) = GPT2Inference.SampleWord(wordProbs, totalProb);
+            (float prob, string word) = MathUtils.Probabilities.Sample(wordProbs, totalProb);
             suggestedWords[i] = word;
             totalProb -= prob;
         }

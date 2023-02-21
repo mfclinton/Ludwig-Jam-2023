@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using MathUtils;
 
 namespace AICore
 {
@@ -66,27 +67,6 @@ namespace AICore
         }
 
         /// <summary>
-        /// Softmaxes the `orderedZipped` list into probabilities 
-        /// </summary>
-        static List<(float, int)> CalculateProbs(List<(float, int)> orderedZipped, float temperature = 1)
-        {
-            float max = orderedZipped.Max(tup => tup.Item1);
-            float normalizer = orderedZipped.Select(tup => Mathf.Exp((tup.Item1 - max) / temperature)).Sum();
-            List<(float, int)> probs = orderedZipped.Select(tup => (Mathf.Exp((tup.Item1 - max) / temperature) / normalizer, tup.Item2)).ToList();
-
-            return probs;
-        }
-
-        static List<(float, string)> CalculateProbs(List<(float, string)> orderedZipped, float temperature = 1)
-        {
-            float max = orderedZipped.Max(tup => tup.Item1);
-            float normalizer = orderedZipped.Select(tup => Mathf.Exp((tup.Item1 - max) / temperature)).Sum();
-            List<(float, string)> probs = orderedZipped.Select(tup => (Mathf.Exp((tup.Item1 - max) / temperature) / normalizer, tup.Item2)).ToList();
-
-            return probs;
-        }
-
-        /// <summary>
         /// Modifies the `orderedZipped` list in place, leaving only the topP percent of tokens
         /// </summary>
         static void TopP(List<(float, int)> orderedZipped, float topP)
@@ -94,7 +74,7 @@ namespace AICore
             if (topP == 1f)
                 return;
 
-            List<(float, int)> probs = CalculateProbs(orderedZipped);
+            List<(float, int)> probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
 
             float cummProb = 0f;
             int index = 0;
@@ -180,7 +160,7 @@ namespace AICore
             List<(float, int)> orderedZipped = ProcessLogits(logits);
 
             TopK(orderedZipped, branches);
-            List<(float, int)> probs = CalculateProbs(orderedZipped);
+            List<(float, int)> probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
             probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
 
             while (queuedWords.Count() != 0 && completedWords.Count < maxWordCount)
@@ -192,7 +172,7 @@ namespace AICore
                 orderedZipped = ProcessLogits(logits);
                     
                 TopK(orderedZipped, branches);
-                probs = CalculateProbs(orderedZipped);
+                probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
 
                 long[] temp = new long[1];
                 foreach ((float prob, int index) in probs)
@@ -226,31 +206,8 @@ namespace AICore
                 else
                     setOfWordProbs[x.Item2] += x.Item1;
             });
-            List<(float, string)> wordProbs = CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), sensitivity);
+            List<(float, string)> wordProbs = MathUtils.Probabilities.CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), sensitivity);
             return wordProbs;
-        }
-
-        /// <summary>
-        /// Takes a probability distribution of words, and samples from it
-        /// </summary>
-        public static (float, string) SampleWord(List<(float, string)> wordProbs, float totalProb = 1f)
-        {
-            float cummProb = 0f;
-            float rng = UnityEngine.Random.Range(0, totalProb);
-
-            for(int i = 0; i < wordProbs.Count; i++)
-            {
-                (float prob, string word) = wordProbs[i];
-                cummProb += prob;
-
-                if (rng <= cummProb)
-                {
-                    wordProbs.RemoveAt(i); // TODO: Validate
-                    return (prob, word);
-                }
-            }
-
-            throw new Exception("Probability Distribution Not Normalized");
         }
     }
 

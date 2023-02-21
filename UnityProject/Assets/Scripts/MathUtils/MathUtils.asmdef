@@ -1,9 +1,7 @@
 {
-    "name": "AICore",
+    "name": "MathUtils",
     "rootNamespace": "",
-    "references": [
-        "GUID:1f12af9ea0849a04d8d562b206bef08f"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
