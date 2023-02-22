@@ -27,6 +27,11 @@ public class UIManager : MonoBehaviour
     private void UpdateCurrentTweet(string text)
     {
         currentTweet.text = text;
+
+        for (int i = 0; i < suggestedTweetsPool.Count; i++)
+        {
+            suggestedTweetsPool[i].text = "";
+        }
     }
 
     public void UpdateSuggestedWords(string[] words)
