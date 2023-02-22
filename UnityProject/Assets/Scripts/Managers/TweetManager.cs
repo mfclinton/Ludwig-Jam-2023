@@ -6,6 +6,7 @@ using AICore;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using MathUtils;
+using System.Threading.Tasks;
 
 public class TweetManager : MonoBehaviour
 {
@@ -42,9 +43,9 @@ public class TweetManager : MonoBehaviour
         UpdateSuggestions();
     }
 
-    public void UpdateSuggestions(int branching = 3)
+    public async void UpdateSuggestions(int branching = 3)
     {
-        var wordProbs = GPT2Inference.RecommendedNextWords(session, tokenizer, currentTweet, branching);
+        var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, currentTweet, branching));
         string[] suggestedWords = new string[numSuggestions];
 
         float totalProb = 1f;

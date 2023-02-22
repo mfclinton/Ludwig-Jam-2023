@@ -49,13 +49,20 @@ namespace AICore
             return logits;
         }
 
-        static List<(float, int)> ProcessLogits(float[] logits)
+        /// <summary>
+        /// Returns an ordered (probability, tokenIndex) pairs given an array of logits
+        /// </summary>
+        static List<(float, int)> ProcessLogits(float[] logits, int topK = 1)
         {
             int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
             IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
             List<(float, int)> orderedZipped = zipped.OrderByDescending(tup => tup.Item1).ToList();
 
-            return orderedZipped;
+            TopK(orderedZipped, topK);
+            
+            List<(float, int)> probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
+            
+            return probs;
         }
 
         /// <summary>
@@ -69,29 +76,25 @@ namespace AICore
         /// <summary>
         /// Constructs the next n most likely tokens in a sequence given an input string
         /// </summary>
-        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches, float sensitivity = 0.1f, int maxWordCount = 8)
+        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches,
+                                                                 float sensitivity = 0.1f, int maxWordCount = 8)
         {
             List<(float, string)> completedWords = new List<(float, string)>();
             Queue<(float, string)> queuedWords = new Queue<(float, string)>();
 
             List<long> encodedInputSeq = tokenizer.Encode(input).ToList();
             float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
-            List<(float, int)> orderedZipped = ProcessLogits(logits);
+            List<(float, int)> probs = ProcessLogits(logits, topK: branches);
 
-            TopK(orderedZipped, branches);
-            List<(float, int)> probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
             probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
 
             while (queuedWords.Count() != 0 && completedWords.Count < maxWordCount)
             {
                 (float p, string chunk) = queuedWords.Dequeue();
-                    
+
                 encodedInputSeq = tokenizer.Encode(input + chunk).ToList();
                 logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
-                orderedZipped = ProcessLogits(logits);
-                    
-                TopK(orderedZipped, branches);
-                probs = MathUtils.Probabilities.CalculateProbs(orderedZipped);
+                probs = ProcessLogits(logits, topK: branches);
 
                 long[] temp = new long[1];
                 foreach ((float prob, int index) in probs)
