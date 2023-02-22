@@ -45,12 +45,26 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         List<(float, int)> values = new List<(float, int)>();
 
+        float max_value = 0f;
+        int max_index = -1;
+
         for (int i = 0; i < dists.Length; i++)
         {
             float v = (KeyboardManager.radius - dists[i]) / KeyboardManager.radius;
-            if(0f <= v)
+            if(max_value < v || max_index == -1)
+            {
+                max_index = i;
+                max_value = v;
+            }
+
+            if (0f <= v)
+            {
                 values.Add((v, i));
+            }
         }
+
+        if (values.Count == 0)
+            values.Add((max_value, max_index));
 
         return MathUtils.Probabilities.CalculateProbs(values);
     }
