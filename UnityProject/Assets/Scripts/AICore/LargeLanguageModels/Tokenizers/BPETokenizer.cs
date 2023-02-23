@@ -49,13 +49,18 @@ namespace AICore
             }
         }
 
-        public override string Decode(Int64[] enc)
+        public override string Decode(Int64[] enc, bool addStartEndTokens = false)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach(int i in enc)
+            for (int i = 0; i < enc.Length; i++)
             {
-                sb.Append(decodingLookupDict[i]);
+                if (addStartEndTokens && (i == 0 || i == enc.Length - 1))
+                    continue;
+
+                long token_index = enc[i];
+                string chunk = decodingLookupDict[(int)token_index];
+                sb.Append(chunk);
             }
 
             return sb.ToString().Replace(spaceTokenChar, ' ').Replace("\\", "");
@@ -63,7 +68,7 @@ namespace AICore
 
         // Encode as described by
         // https://guillaume-be.github.io/2021-09-16/byte_pair_encoding#bpe-tokenization-naive
-        public override Int64[] Encode(string str)
+        public override Int64[] Encode(string str, bool addStartEndTokens = false)
         {
             List<Int64> result = new List<Int64>();
 
@@ -103,6 +108,13 @@ namespace AICore
                 {
                     result.Add(encodingLookupDict[symbol.Length][symbol]);
                 }
+            }
+
+            if(addStartEndTokens)
+            {
+                // Delineate start and end of sequence
+                result.Insert(0, 0);
+                result.Add(2);
             }
 
             return result.ToArray();

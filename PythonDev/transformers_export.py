@@ -10,19 +10,20 @@ def transformers_export(model_name, feature, opset, output_file_path):
     os.system(export_model_command)
 
 def gpt2_export():
-    gpt2_output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\GPTDecoders\\GPT2OpenAI"
-    gpt2_name = "gpt2"
-    transformers_export(gpt2_name, "causal-lm", "13", gpt2_output_file_path)
+    output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\GPTDecoders\\GPT2OpenAI"
+    name = "gpt2"
+    transformers_export(name, "causal-lm", "13", output_file_path)
 
 def twitter_sentiment_export():
-    gpt2_output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\TwitterSentiment"
-    gpt2_name = "cardiffnlp/twitter-roberta-base-emotion"
-    transformers_export(gpt2_name, "sequence-classification", "13", gpt2_output_file_path)
+    output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\TwitterSentiment"
+    # name = "cardiffnlp/twitter-roberta-base-emotion"
+    name = "cardiffnlp/twitter-roberta-base-sentiment"
+    transformers_export(name, "sequence-classification", "13", output_file_path)
 
 def english_emotion_export():
-    gpt2_output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\EnglishEmotion"
-    gpt2_name = "j-hartmann/emotion-english-distilroberta-base"
-    transformers_export(gpt2_name, "sequence-classification", "13", gpt2_output_file_path)
+    output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\EnglishEmotion"
+    name = "j-hartmann/emotion-english-distilroberta-base"
+    transformers_export(name, "sequence-classification", "13", output_file_path)
 
 def parse_args():
     parser = argparse.ArgumentParser()
