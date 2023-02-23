@@ -29,6 +29,15 @@ namespace MathUtils
             return probs;
         }
 
+        public static float[] CalculateProbs(float[] logits, float temperature = 1)
+        {
+            float max = logits.Max(x => x);
+            float normalizer = logits.Select(x => Mathf.Exp((x - max) / temperature)).Sum();
+            float[] probs = logits.Select(x => Mathf.Exp((x - max) / temperature) / normalizer).ToArray();
+
+            return probs;
+        }
+
         /// <summary>
         /// Takes a probability distribution of words, and samples from it
         /// </summary>
