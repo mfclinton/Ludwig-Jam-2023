@@ -9,19 +9,9 @@ public class KeyboardManager : MonoBehaviour
     KeyboardArea[] keyboardAreas;
     public static float radius = 100f;
 
-    //public delegate void OnKeyboardAreaUpdateHandler(string[] suggestedTweets);
-    //public event OnKeyboardAreaUpdateHandler OnNewSuggestedTweets;
-
-
     private void Awake()
     {
         keyboardAreas = FindObjectsOfType<KeyboardArea>();
-    }
-
-    public void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-            HandleClick();
     }
 
     KeyboardArea GetActiveKeyboardArea()
@@ -29,7 +19,7 @@ public class KeyboardManager : MonoBehaviour
         return keyboardAreas.FirstOrDefault((ka) => ka.isFocused);
     }
 
-    void HandleClick()
+    public void HandleClick()
     {
         KeyboardArea activeKeyboard = GetActiveKeyboardArea();
         if (activeKeyboard == null)

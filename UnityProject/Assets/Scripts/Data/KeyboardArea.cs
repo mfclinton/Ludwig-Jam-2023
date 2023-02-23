@@ -28,6 +28,7 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             return;
 
         UpdateButtonDistances();
+        UpdateButtonColors();
     }
 
     void UpdateButtonDistances()
@@ -39,6 +40,19 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             Button b = buttons[i];
             dists[i] = Vector3.Distance(mousePosition, b.transform.position);
         }
+    }
+
+    void UpdateButtonColors()
+    {
+        List<(float, int)> probs = GetButtonProbabilities();
+
+        // Clear
+        for (int i = 0; i < buttons.Length; i++)
+            buttons[i].image.color = Color.white;
+
+        if(isFocused)
+            foreach((float p, int i) in probs)
+                buttons[i].image.color = Color.Lerp(Color.white, Color.red, p);
     }
 
     public List<(float, int)> GetButtonProbabilities()
@@ -79,5 +93,6 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         Debug.Log("Cursor Exiting " + name + " GameObject");
         isFocused = false;
+        UpdateButtonColors();
     }
 }

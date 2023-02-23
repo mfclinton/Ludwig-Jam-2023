@@ -38,7 +38,7 @@ public class TweetManager : MonoBehaviour
 
     public void UpdateTweet(string chunk = "")
     {
-        currentTweet += chunk;
+        currentTweet += chunk; // TODO: empty chunk shouldn't trigger a new run
         OnTweetUpdated.Invoke(currentTweet);
         UpdateSuggestions();
     }
