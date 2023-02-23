@@ -42,6 +42,9 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
     }
 
+    /// <summary>
+    /// TODO: To improve color mapping, create a new button class that stores state. Have keyboard manager map state to goal color. Remap color!
+    /// </summary>
     void UpdateButtonColors()
     {
         List<(float, int)> probs = GetButtonProbabilities();
@@ -52,7 +55,7 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         if(isFocused)
             foreach((float p, int i) in probs)
-                buttons[i].image.color = Color.Lerp(Color.white, Color.red, p);
+                buttons[i].image.color = Color.Lerp(Color.white, KeyboardManager.keyColor, p);
     }
 
     public List<(float, int)> GetButtonProbabilities()

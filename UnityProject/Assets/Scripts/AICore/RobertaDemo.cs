@@ -11,12 +11,14 @@ public class RobertaDemo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // string modelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/GPTDecoders/GPT2OpenAI/model.onnx";
         string modelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/TwitterSentiment/model.onnx";
         // string modelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/EnglishEmotion/model.onnx";
         var session = new InferenceSession(modelPath);
 
+        // var tokenizer = new GPT2Tokenizer();
         var tokenizer = new RobertaTokenizer();
-        string testInput = "Thank you so very much. I am so happy!";
+        string testInput = "Hello my name is bob";
         List<long> encodedInputSeq = tokenizer.Encode(testInput).ToList();
         var decoded = tokenizer.Decode(encodedInputSeq.ToArray());
         Debug.Assert(decoded.Equals(testInput));

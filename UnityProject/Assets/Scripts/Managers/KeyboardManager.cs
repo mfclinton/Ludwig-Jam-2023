@@ -8,6 +8,7 @@ public class KeyboardManager : MonoBehaviour
 {
     KeyboardArea[] keyboardAreas;
     public static float radius = 100f;
+    public static Color keyColor = Color.gray;
 
     private void Awake()
     {
