@@ -33,9 +33,4 @@ public class GPT2Demo : MonoBehaviour
 
         Debug.Log(testInput);
     }
-
-    void Update()
-    {
-        
-    }
 }
