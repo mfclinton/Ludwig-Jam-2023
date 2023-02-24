@@ -7,6 +7,7 @@ using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using MathUtils;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class TweetManager : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class TweetManager : MonoBehaviour
 
     InferenceSession session;
     GPT2Tokenizer tokenizer;
+    TopicManager topicManager;
 
     private void Start()
     {
@@ -29,6 +31,7 @@ public class TweetManager : MonoBehaviour
         string modelPath = Application.dataPath + MODEL_PATH_GPT2_OPENAI;
         session = new InferenceSession(modelPath);
         tokenizer = new GPT2Tokenizer();
+        topicManager = FindObjectOfType<TopicManager>();
 
         numSuggestions = 3;
 
@@ -37,7 +40,7 @@ public class TweetManager : MonoBehaviour
 
     public void ResetTweet()
     {
-        currentTweet = "The"; // TODO
+        currentTweet = ""; // TODO
         UpdateTweet();
     }
 
@@ -50,15 +53,26 @@ public class TweetManager : MonoBehaviour
 
     public async void UpdateSuggestions(int branching = 3)
     {
-        var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, currentTweet, branching));
         string[] suggestedWords = new string[numSuggestions];
-
-        float totalProb = 1f;
-        for (int i = 0; i < numSuggestions; i++)
+        if (currentTweet.Length == 0)
         {
-            (float prob, string word) = MathUtils.Probabilities.Sample(wordProbs, totalProb);
-            suggestedWords[i] = word;
-            totalProb -= prob;
+            int[] indexes = MathUtils.Probabilities.SampleUniform(0, topicManager.activeTopics.Length, numSuggestions, withReplacement: false);
+            for (int i = 0; i < numSuggestions; i++)
+            {
+                suggestedWords[i] = topicManager.activeTopics[indexes[i]].name;
+            }
+        }
+        else
+        {
+            var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, currentTweet, branching));
+
+            float totalProb = 1f;
+            for (int i = 0; i < numSuggestions; i++)
+            {
+                (float prob, string word) = MathUtils.Probabilities.Sample(wordProbs, totalProb);
+                suggestedWords[i] = word;
+                totalProb -= prob;
+            }
         }
 
         OnNewSuggestedTweets.Invoke(suggestedWords);
