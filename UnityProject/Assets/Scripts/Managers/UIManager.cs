@@ -56,7 +56,7 @@ public class UIManager : MonoBehaviour
 
     private void UpdateCurrentTweet(string text)
     {
-        currentTweet.text = text;
+        currentTweet.text = text + "|";
 
         for (int i = 0; i < suggestedTweetsPool.Count; i++)
         {
@@ -70,7 +70,10 @@ public class UIManager : MonoBehaviour
         {
             Button button = Instantiate(tweetPrefab, suggestedWordsParent);
             TextMeshProUGUI textMeshPro = button.GetComponentInChildren<TextMeshProUGUI>();
-            button.onClick.AddListener(() => tweetManager.UpdateTweet(textMeshPro.text));
+            button.onClick.AddListener(() => {
+                string cleanedText = textMeshPro.text.Replace('_', ' '); //TODO: Better soluton for cleaning
+                tweetManager.UpdateTweet(cleanedText);
+            });
             suggestedTweetsPool.Add(textMeshPro);
         }
 
@@ -80,7 +83,7 @@ public class UIManager : MonoBehaviour
             if (words.Length <= i)
                 isActive = false;
             else
-                suggestedTweetsPool[i].text = words[i];
+                suggestedTweetsPool[i].text = words[i].Replace(' ', '_'); ;
 
             suggestedTweetsPool[i].transform.parent.gameObject.SetActive(isActive);
         }
