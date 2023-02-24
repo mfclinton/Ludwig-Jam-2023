@@ -29,6 +29,11 @@ public class GameManager : MonoBehaviour
         eval = new Evaluator();
     }
 
+    private void Start()
+    {
+        OnFollowersUpdated.Invoke(0, totalFollowers);
+    }
+
     public void SubmitTweet()
     {
         string tweet = tweetManager.currentTweet;
