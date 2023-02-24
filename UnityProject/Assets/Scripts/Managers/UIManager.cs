@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
     List<GameObject> topicPool;
 
     // General
+    [SerializeField] Sprite cootsPfp;
     [SerializeField] TextMeshProUGUI totalFollowers;
 
     // Components
@@ -93,6 +94,7 @@ public class UIManager : MonoBehaviour
     {
         GameObject post = Instantiate(postPrefab, feedParent);
         post.GetComponentInChildren<TextMeshProUGUI>().text = text;
+        post.GetComponentsInChildren<Image>().First(x => x.name == "ProfilePic").sprite = cootsPfp; // TODO: Make this better
     }
 
     public void UpdateTopics(Topic[] topics)

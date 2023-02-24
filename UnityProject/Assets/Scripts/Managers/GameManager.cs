@@ -37,6 +37,9 @@ public class GameManager : MonoBehaviour
     public void SubmitTweet()
     {
         string tweet = tweetManager.currentTweet;
+        if (tweet.Length == 0)
+            return;
+
         Topic topic = eval.MatchTopic(tweet, topicManager.activeTopics);
        
         int followersGained = eval.EvaluateTweet(tweet, topic);
