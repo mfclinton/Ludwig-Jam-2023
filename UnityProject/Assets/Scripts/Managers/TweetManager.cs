@@ -37,7 +37,7 @@ public class TweetManager : MonoBehaviour
 
     public void ResetTweet()
     {
-        currentTweet = "The fox jumped over the"; // TODO
+        currentTweet = "The"; // TODO
         UpdateTweet();
     }
 

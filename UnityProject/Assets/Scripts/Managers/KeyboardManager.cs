@@ -7,7 +7,7 @@ using System.Linq;
 public class KeyboardManager : MonoBehaviour
 {
     KeyboardArea[] keyboardAreas;
-    public static float radius = 100f;
+    public static float radius;
     public static float temperature = 0.2f;
     public static Color keyColor = Color.green;
 
