@@ -83,7 +83,7 @@ public class KeyboardArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (values.Count == 0)
             values.Add((max_value, max_index));
 
-        return MathUtils.Probabilities.CalculateProbs(values);
+        return MathUtils.Probabilities.CalculateProbs(values, KeyboardManager.temperature);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
