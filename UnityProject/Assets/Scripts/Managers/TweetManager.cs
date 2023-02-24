@@ -24,6 +24,10 @@ public class TweetManager : MonoBehaviour
     GPT2Tokenizer tokenizer;
     TopicManager topicManager;
 
+    // Manage tasks
+    bool activeSuggesting;
+    string lastCurrentTweetSuggestions;
+
     private void Start()
     {
         // ML Setup
@@ -48,13 +52,17 @@ public class TweetManager : MonoBehaviour
     {
         currentTweet += chunk; // TODO: empty chunk shouldn't trigger a new run
         OnTweetUpdated.Invoke(currentTweet);
-        UpdateSuggestions();
+        UpdateSuggestions(currentTweet);
     }
 
-    public async void UpdateSuggestions(int branching = 3)
+    async void UpdateSuggestions(string tweet, int branching = 3, bool overrideActive = false)
     {
+        if (activeSuggesting && !overrideActive)
+            return;
+        activeSuggesting = true;
+
         string[] suggestedWords = new string[numSuggestions];
-        if (currentTweet.Length == 0)
+        if (tweet.Length == 0)
         {
             int[] indexes = MathUtils.Probabilities.SampleUniform(0, topicManager.activeTopics.Length, numSuggestions, withReplacement: false);
             for (int i = 0; i < numSuggestions; i++)
@@ -64,7 +72,7 @@ public class TweetManager : MonoBehaviour
         }
         else
         {
-            var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, currentTweet, branching));
+            var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, tweet, branching));
 
             float totalProb = 1f;
             for (int i = 0; i < numSuggestions; i++)
@@ -76,5 +84,15 @@ public class TweetManager : MonoBehaviour
         }
 
         OnNewSuggestedTweets.Invoke(suggestedWords);
+        lastCurrentTweetSuggestions = tweet;
+
+        if(currentTweet != tweet)
+        {
+            UpdateSuggestions(currentTweet, branching, true);
+        }
+        else
+        {
+            activeSuggesting = false;
+        }
     }
 }
