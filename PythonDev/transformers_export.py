@@ -25,15 +25,20 @@ def english_emotion_export():
     name = "j-hartmann/emotion-english-distilroberta-base"
     transformers_export(name, "sequence-classification", "13", output_file_path)
 
-def roberta_mnli():
+def roberta_large_mnli():
     output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\LargeMNLI"
     name = "roberta-large-mnli"
+    transformers_export(name, "sequence-classification", "13", output_file_path)
+
+def roberta_nli():
+    output_file_path = "UnityProject\\Assets\\StreamingAssets\\AIModels\\LLMs\\Roberta\\BaseNLI"
+    name = "cross-encoder/nli-roberta-base"
     transformers_export(name, "sequence-classification", "13", output_file_path)
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model", choices=["gpt2", "sentiment", "emotion", "robertamnli"], type=str.lower)
+    parser.add_argument("--model", choices=["gpt2", "sentiment", "emotion", "largemnli", "nli"], type=str.lower)
 
     return parser.parse_args()
 
@@ -46,5 +51,7 @@ if __name__ == "__main__":
         twitter_sentiment_export()
     if args.model == "emotion":
         english_emotion_export()
-    if args.model == "robertamnli":
-        roberta_mnli()
+    if args.model == "largemnli":
+        roberta_large_mnli()
+    if args.model == "nli":
+        roberta_nli()

@@ -9,15 +9,36 @@ using MathUtils;
 public class MNLIRobertaDemo : MonoBehaviour
 {
     [SerializeField] string prompt;
+    [SerializeField] bool useLargeMNLI;
+    [SerializeField] bool useBaseMNLI;
     [SerializeField] string[] labels;
     [SerializeField] bool showLogits;
 
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("--- MNLI Demo ---");
+        if(useBaseMNLI)
+            BaseNLIDemo();
+        if(useLargeMNLI)
+            LargeMNLIDemo();
+    }
 
+    void BaseNLIDemo()
+    {
+        Debug.Log("--- Base NLI Demo ---");
+        string modelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/BaseNLI/model.onnx";
+        PerformInference(modelPath);
+    }
+
+    void LargeMNLIDemo()
+    {
+        Debug.Log("--- Large MNLI Demo ---");
         string modelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/LargeMNLI/model.onnx";
+        PerformInference(modelPath);
+    }
+
+    void PerformInference(string modelPath)
+    {
         var session = new InferenceSession(modelPath);
         var tokenizer = new RobertaMNLITokenizer();
         
@@ -38,5 +59,4 @@ public class MNLIRobertaDemo : MonoBehaviour
             Debug.Log($"{label}: {probs[1]}");
         }
     }
-
 }
