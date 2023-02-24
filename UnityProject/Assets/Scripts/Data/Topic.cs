@@ -20,6 +20,7 @@ public class Topic
         return new Topic(name, pops);
     }
 
+    // TODO: put a call here to update topics when this is modified
     public int ModifyPopulation(int index, int num)
     {
         int absPopChange = Mathf.Min(Mathf.Abs(num), Mathf.Abs(pops[index]));

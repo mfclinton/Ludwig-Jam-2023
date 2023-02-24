@@ -16,8 +16,11 @@ public class GameManager : MonoBehaviour
 
     // Events
 
-    public delegate void OnTweetSubmittedHandler(string tweet, Topic topic, int followersGained, int totalFollowers);
+    public delegate void OnTweetSubmittedHandler(string tweet, Topic topic);
     public event OnTweetSubmittedHandler OnTweetSubmitted;
+
+    public delegate void OnFollowersUpdatedHandler(int followersGained, int totalFollowers);
+    public event OnFollowersUpdatedHandler OnFollowersUpdated;
 
     private void Awake()
     {
@@ -30,9 +33,18 @@ public class GameManager : MonoBehaviour
     {
         string tweet = tweetManager.currentTweet;
         Topic topic = eval.MatchTopic(tweet, topicManager.activeTopics);
+       
         int followersGained = eval.EvaluateTweet(tweet, topic);
-        totalFollowers += followersGained;
+        UpdateTotalFollowers(followersGained);
+        
         tweetManager.ResetTweet();
-        OnTweetSubmitted.Invoke(tweet, topic, followersGained, totalFollowers);
+        OnTweetSubmitted.Invoke(tweet, topic);
+        topicManager.UpdateActiveTopics(); // TODO: Move this
+    }
+
+    public void UpdateTotalFollowers(int followersGained)
+    {
+        totalFollowers += followersGained;
+        OnFollowersUpdated.Invoke(followersGained, totalFollowers);
     }
 }

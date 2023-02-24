@@ -16,12 +16,17 @@ public class TopicManager : MonoBehaviour
 
     private void Start()
     {
+        InitializeActiveTopics();
+    }
+
+    public void InitializeActiveTopics()
+    {
+        activeTopics = SampleTopics(numActiveTopics);
         UpdateActiveTopics();
     }
 
     public void UpdateActiveTopics()
     {
-        activeTopics = SampleTopics(numActiveTopics);
         OnTrendingUpdated.Invoke(activeTopics);
     }
 

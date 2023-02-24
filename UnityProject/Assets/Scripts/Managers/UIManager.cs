@@ -44,11 +44,12 @@ public class UIManager : MonoBehaviour
         tweetManager.OnTweetUpdated += UpdateCurrentTweet;
         tweetManager.OnNewSuggestedTweets += UpdateSuggestedWords;
 
-        gameManager.OnTweetSubmitted += (tweet, topic, followersGained, totalFollowers) =>
+        gameManager.OnTweetSubmitted += (tweet, topic) =>
         {
             NewPost(tweet);
-            UpdateTotalFollowers(totalFollowers);
         };
+
+        gameManager.OnFollowersUpdated += (followersGained, totalFollowers) => UpdateTotalFollowers(totalFollowers);
 
         topicManager.OnTrendingUpdated += UpdateTopics;
     }
@@ -110,7 +111,7 @@ public class UIManager : MonoBehaviour
             {
                 TextMeshProUGUI[] texts = topicPool[i].GetComponentsInChildren<TextMeshProUGUI>();
                 texts.First(t => t.gameObject.name == "Title").text = topics[i].name;
-                texts.First(t => t.gameObject.name == "Info").text = topics[i].pops.Length.ToString();
+                texts.First(t => t.gameObject.name == "Info").text = topics[i].TotalFollowers().ToString();
             }
 
             topicPool[i].SetActive(isActive);
