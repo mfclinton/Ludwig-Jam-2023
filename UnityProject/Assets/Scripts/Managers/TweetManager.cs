@@ -30,9 +30,14 @@ public class TweetManager : MonoBehaviour
         session = new InferenceSession(modelPath);
         tokenizer = new GPT2Tokenizer();
 
-        currentTweet = "The fox jumped over the"; // TODO
         numSuggestions = 3;
 
+        ResetTweet();
+    }
+
+    public void ResetTweet()
+    {
+        currentTweet = "The fox jumped over the"; // TODO
         UpdateTweet();
     }
 
