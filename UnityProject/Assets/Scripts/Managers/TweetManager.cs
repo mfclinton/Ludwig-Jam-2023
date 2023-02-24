@@ -26,7 +26,7 @@ public class TweetManager : MonoBehaviour
 
     // Manage tasks
     bool activeSuggesting;
-    string lastCurrentTweetSuggestions;
+    public string lastCurrentTweetSuggestions;
 
     private void Start()
     {
@@ -83,15 +83,14 @@ public class TweetManager : MonoBehaviour
             }
         }
 
-        OnNewSuggestedTweets.Invoke(suggestedWords);
         lastCurrentTweetSuggestions = tweet;
-
         if(currentTweet != tweet)
         {
             UpdateSuggestions(currentTweet, branching, true);
         }
         else
         {
+            OnNewSuggestedTweets.Invoke(suggestedWords);
             activeSuggesting = false;
         }
     }
