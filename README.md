@@ -6,6 +6,7 @@
 # Packages Included
 * [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity) (MIT License)
 * [ONNX Runtime for C#](https://github.com/microsoft/onnxruntime) (MIT License)
+* [MathNet.Numerics](https://www.nuget.org/packages/MathNet.Numerics) (MIT License)
 
 ## PythonAIDev
 **Setting up a Python environment is necessary for downloading ONNX model files as we currently do not redistribute them in this project due to file limitations.**
