@@ -125,6 +125,6 @@ public class UIManager : MonoBehaviour
 
     public void UpdateTotalFollowers(int count)
     {
-        totalFollowers.text = count.ToString();
+        totalFollowers.text = count.ToString() + " Followers";
     }
 }
