@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class TrendingTopicUI : MonoBehaviour
+public class TweetReactionUI : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI topicField;
-    [SerializeField] TextMeshProUGUI numTweetsField;
+    [SerializeField] TextMeshProUGUI followersField;
 }
