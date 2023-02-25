@@ -51,14 +51,17 @@ def sample_tokens(context, top_k=25, sample=True):
 
 
 def complete_word(context, current_word):
+    # We have a maximum of 5 tokens to complete the word (to prevent it from getting too long/infinite loops)
     for _ in range(5):
         # Sample the next token deterministically
         temp_context = context + " " + current_word
         next_token = sample_tokens(temp_context, top_k=1)[0]
 
+        # A space, period or comma in the next token indicates the word is over
         if next_token[0] in [",", ".", " "]:
             return current_word
         else:
+            # Otherwise we add the next token to the current word to keep building up the word
             current_word += next_token
             context += next_token
     return current_word
@@ -110,6 +113,8 @@ def get_word_completions(context):
     context = " ".join(context.split(" ")[:-1])
 
     top_3_completed_words = []
+    # added_current_word is a flag to check if the current word has been added to the list of top 3 words
+    # We only want to add the current word once
     added_current_word = False
     for top_token in top_tokens:
         # Terminate once we have 3 words
@@ -118,11 +123,15 @@ def get_word_completions(context):
 
         # Check if the token suggests the word is over
         if top_token[0] in [",", ".", " "]:
+            # if the current word has not been added, add it
             if not added_current_word:
                 top_3_completed_words.append(current_word)
                 added_current_word = True
-            continue
+            else:
+                # otherwise continue
+                continue
 
+        # Remove any non alphanumeric characters
         top_token = re.sub(r"[^a-zA-Z0-9']", "", top_token)
         top_token = top_token.lower()
 
@@ -158,13 +167,10 @@ if __name__ == "__main__":
     words_generic_path = "data/starting_words/words_generic.txt"
     words_catlike_path = "data/starting_words/words_catlike.txt"
     words_creative_path = "data/starting_words/words_creative.txt"
-
     with open(words_generic_path, "r") as f:
         words_generic = f.read().splitlines()
-
     with open(words_catlike_path, "r") as f:
         words_catlike = f.read().splitlines()
-
     with open(words_creative_path, "r") as f:
         words_creative = f.read().splitlines()
 
@@ -200,6 +206,8 @@ if __name__ == "__main__":
         print(f"{context}[{' '.join(next_words)}]")
 
     test_next_words = [
+        "this is an apple. ",
+        "i have an apple, banana,",
         "my best ",
         "allen just sent a spaceship to the ",
         "i can't ",
