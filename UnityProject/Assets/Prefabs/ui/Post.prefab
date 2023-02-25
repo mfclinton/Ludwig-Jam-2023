@@ -310,8 +310,8 @@ MonoBehaviour:
   m_text: I want to become a big rich famous influencer! Hoping to get there with
     some BANGER tweets
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e86465e97ae18284e8d1adb2ca311ee9, type: 2}
+  m_sharedMaterial: {fileID: 198688955762348997, guid: e86465e97ae18284e8d1adb2ca311ee9, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -335,7 +335,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
+  m_fontSize: 22.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -413,8 +413,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 252.68, y: -66.337}
-  m_SizeDelta: {x: 154.19, y: 66.337}
+  m_AnchoredPosition: {x: 252.68, y: -60.7}
+  m_SizeDelta: {x: 154.19, y: 25.8035}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &4223695308114789538
 CanvasRenderer:
@@ -446,8 +446,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Saturday 4:00PM
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8683057b9e5633642bf5d7675b6dbb82, type: 2}
+  m_sharedMaterial: {fileID: -4154122941180559983, guid: 8683057b9e5633642bf5d7675b6dbb82, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 16.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -742,10 +742,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Coots
+  m_text: coots
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8683057b9e5633642bf5d7675b6dbb82, type: 2}
+  m_sharedMaterial: {fileID: -4154122941180559983, guid: 8683057b9e5633642bf5d7675b6dbb82, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -769,7 +769,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
+  m_fontSize: 28.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
