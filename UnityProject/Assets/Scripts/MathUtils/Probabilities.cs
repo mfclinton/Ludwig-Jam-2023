@@ -86,12 +86,14 @@ namespace MathUtils
 
         public static int[] SampleUniform(int low, int high, int numSamples, bool withReplacement = true)
         {
+            System.Random r = new System.Random();
+
             int[] samples = new int[numSamples];
             List<int> indexes = Enumerable.Range(low, high - low).ToList();
 
             for (int i = 0; i < numSamples; i++)
             {
-                int randomIndex = UnityEngine.Random.Range(0, indexes.Count());
+                int randomIndex = r.Next(0, indexes.Count());
                 samples[i] = indexes[randomIndex];
                 if (!withReplacement)
                     indexes.RemoveAt(randomIndex);

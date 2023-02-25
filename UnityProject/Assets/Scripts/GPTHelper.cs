@@ -181,7 +181,7 @@ public class GPTHelper : MonoBehaviour
         return indexes.Select((i) => starterWords[i]);
     }
 
-    public IEnumerable<string> SampleTokens(string context, int topK = 25)
+    public IEnumerable<string> SampleTokens(string context, int topK = 25, bool sample = true)
     {
         // Encodes the text to logits
         long[] encodedInputSeq = tokenizer.Encode(context);
@@ -195,8 +195,14 @@ public class GPTHelper : MonoBehaviour
         List<(float, int)> probs = AICore.GPT2Inference.ProcessLogits(logits, topK); // TODO: Can we make this more efficient?
 
         // TODO: Unsure of the other sampling code here
-
-        return probs.Select(tup => tokenizer.Decode(new long[] { tup.Item2 }));
+        if(sample)
+        {
+            // Sample without replacement
+            int[] indexes = Probabilities.SampleUniform(0, probs.Count, topK, withReplacement: false);
+            return indexes.Select(i => tokenizer.Decode(new long[] { probs[i].Item2 }));
+        }
+        else
+            return probs.Select(tup => tokenizer.Decode(new long[] { tup.Item2 }));
     }
 
     public string CompleteWord(string context, string currentWord, int maxDepth = 5)
@@ -222,9 +228,9 @@ public class GPTHelper : MonoBehaviour
         return currentWord;
     }
 
-    public IEnumerable<string> GetTopNextTokens(string context, int numNextWords, bool useCurrentWord = false, int topK = 25)
+    public IEnumerable<string> GetTopNextTokens(string context, int numNextWords, bool useCurrentWord = false, int topK = 25, bool sample = true)
     {
-        IEnumerable<string> topTokens = SampleTokens(context, topK);
+        IEnumerable<string> topTokens = SampleTokens(context, topK, sample);
 
         string currentWord = null;
         bool addedSelf = false;
@@ -290,7 +296,7 @@ public class GPTHelper : MonoBehaviour
     /// </summary>
     public IEnumerable<string> GetWordCompletions(string context, int numNextWords, int topK = 50)
     {
-        IEnumerable<string> topNextTokens = GetTopNextTokens(context, numNextWords, true, topK);
+        IEnumerable<string> topNextTokens = GetTopNextTokens(context, numNextWords, true, topK, false);
 
         // TODO: Consider rearranging
 
