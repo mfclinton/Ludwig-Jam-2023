@@ -14,14 +14,99 @@ public class GPTHelper : MonoBehaviour
     [SerializeField] TextAsset[] starterWordFiles;
     [SerializeField] TextAsset bannedWordsFile;
 
+    // Internal properties
+    InferenceSession session;
+    GPT2Tokenizer tokenizer;
+
+    string[] starterWords;
+    HashSet<long> bannedTokens;
+    HashSet<string> bannedWords;
 
     private void Start()
     {
-        (InferenceSession session, GPT2Tokenizer tokenizer) = LoadModel();
+        (session, tokenizer) = LoadModel();
 
-        string[] starterWords = LoadStarterWords().ToArray();
-        HashSet<long> bannedTokens = ComputeBannedTokens(session, tokenizer);
-        HashSet<string> bannedWords = LoadBannedWords();
+        starterWords = LoadStarterWords().ToArray();
+        bannedTokens = ComputeBannedTokens();
+        bannedWords = LoadBannedWords();
+
+        string[] test_next_words = new string[]{
+            "this is an apple. ",
+            "i have an apple, banana,",
+            "my best ",
+            "allen just sent a spaceship to the ",
+            "i can't ",
+            "i don't know what to do ",
+            "how are my cats ",
+            "mario is a cool ",
+            "i just ",
+            "when does ",
+            "i forgot my ",
+            "the door creaked ",
+            "she whispered ",
+            "the coffee was ",
+            "i need more ",
+            "the car won't ",
+            "i love to ",
+            "the sky is ",
+            "my favorite color is ",
+            "the rain is ",
+            "he always ",
+            "i'm allergic to ",
+            "the movie made me ",
+            "the cat meowed ",
+            "the phone rang ",
+            "the tree swayed ",
+            "the music played ",
+            "the pen ran out of ",
+            "the book fell ",
+            "the fire crackled ",
+        };
+
+        string[] test_middle_words = new string[]{
+            "the door crea",
+            "my be",
+            "my n",
+            "allen just sent a spaceship to th",
+            "i can",
+            "i don't know what to d",
+            "how are my ca",
+            "mario is a co",
+            "i jus",
+            "when doe",
+            "i forgot m",
+            "she whispe",
+            "the coffee wa",
+            "i need mor",
+            "the car won",
+            "i love t",
+            "the sky i",
+            "my favorite color i",
+            "he alw",
+            "the movie made m",
+            "the cat me",
+            "the phone ran",
+            "the tree swaye",
+            "the music pla",
+            "the pen ran out o",
+            "the book fe",
+            "the fire cra",
+        };
+
+        Debug.Log("--Next Word Test--");
+        foreach (string context in test_next_words)
+        {
+            string result = string.Join(", ", GetNextWords(context, 3));
+            Debug.Log($"{context} | {result}");
+        }
+
+        Debug.Log("--Middle Word Test--");
+        foreach (string context in test_middle_words)
+        {
+            string result = string.Join(", ", GetWordCompletions(context, 3));
+            Debug.Log($"{context} | {result}");
+        }
+
     }
 
     public (InferenceSession, GPT2Tokenizer) LoadModel()
@@ -45,7 +130,7 @@ public class GPTHelper : MonoBehaviour
         return starterWords;
     }
 
-    public HashSet<long> ComputeBannedTokens(InferenceSession session, GPT2Tokenizer tokenizer)
+    public HashSet<long> ComputeBannedTokens()
     {
         IEnumerable<long> tokenIndexes = Enumerable.Range(0, GPT2Tokenizer.MAX_TOKENS).Select(i => (long)i);
         string[] tokens = tokenIndexes.Select((t) => tokenizer.Decode(new long[] { t })).ToArray();
@@ -90,13 +175,13 @@ public class GPTHelper : MonoBehaviour
 
     #region Sampling Methods
     
-    public IEnumerable<string> SampleReplacementWords(string[] starterWords, int numWords)
+    public IEnumerable<string> SampleReplacementWords(int numWords)
     {
         int[] indexes = Probabilities.SampleUniform(0, starterWordFiles.Length, numWords, withReplacement: false);
         return indexes.Select((i) => starterWords[i]);
     }
 
-    public IEnumerable<string> SampleTokens(InferenceSession session, GPT2Tokenizer tokenizer, string context, int topK = 25)
+    public IEnumerable<string> SampleTokens(string context, int topK = 25)
     {
         // Encodes the text to logits
         long[] encodedInputSeq = tokenizer.Encode(context);
@@ -110,7 +195,7 @@ public class GPTHelper : MonoBehaviour
         return probs.Select(tup => tokenizer.Decode(new long[] { tup.Item2 }));
     }
 
-    public string CompleteWord(InferenceSession session, GPT2Tokenizer tokenizer, string context, string currentWord, int maxDepth = 5)
+    public string CompleteWord(string context, string currentWord, int maxDepth = 5)
     {
         // We have a maximum of `maxDepth` tokens to complete the word (to prevent it from getting too long/infinite loops)
         for (int i = 0; i < maxDepth; i++)
@@ -118,7 +203,7 @@ public class GPTHelper : MonoBehaviour
             // Samples the next token deterministically
             // TODO: Do we want to complete words deterministically?
             string tempContext = context + " " + currentWord;
-            string nextToken = SampleTokens(session, tokenizer, context, topK: 1).First();
+            string nextToken = SampleTokens(context, topK: 1).First();
 
             // A space, period or comma in the next token indicates the word is over
             if (nextToken[0] == ',' || nextToken[0] == '.' || nextToken[0] == ' ')
@@ -133,9 +218,14 @@ public class GPTHelper : MonoBehaviour
         return currentWord;
     }
 
-    public IEnumerable<string> GetTopNextTokens(InferenceSession session, GPT2Tokenizer tokenizer, string context, int numNextWords, string currentWord = null, int topK = 25, HashSet<string> bannedWords = null, string[] starterWords)
+    public IEnumerable<string> GetTopNextTokens(string context, int numNextWords, bool useCurrentWord = false, int topK = 25)
     {
-        IEnumerable<string> topTokens = SampleTokens(session, tokenizer, context, topK);
+        IEnumerable<string> topTokens = SampleTokens(context, topK);
+
+        string currentWord = null;
+        bool addedSelf = false;
+        if(useCurrentWord)
+            (context, currentWord) = SplitContextAndCurrentWord(context);
 
         Regex regex = new Regex("[^a-zA-Z0-9']");
         LinkedList<string> topNextTokens = new LinkedList<string>();
@@ -144,16 +234,20 @@ public class GPTHelper : MonoBehaviour
             if (topNextTokens.Count == numNextWords)
                 break;
 
-            if(currentWord != null && (token[0] == ',' || token[0] == '.' || token[0] == ' '))
+            if (useCurrentWord && !addedSelf && (token[0] == ',' || token[0] == '.' || token[0] == ' '))
             {
                 topNextTokens.AddLast(currentWord);
+                addedSelf = true;
+                continue;
             }
 
             // Removes alphanumeric characters and normalizes the characters to lowercase
             string cleanedToken = regex.Replace(token, "").ToLower();
 
             // Completes the word
-            string nextWord = CompleteWord(session, tokenizer, context, cleanedToken);
+            if (useCurrentWord)
+                cleanedToken = currentWord + cleanedToken;
+            string nextWord = CompleteWord(context, cleanedToken);
 
             // Check if word is banned
             if (bannedWords != null && bannedWords.Contains(nextWord))
@@ -165,7 +259,7 @@ public class GPTHelper : MonoBehaviour
         // Once 3 words are found, return them (if not pad to some random words)
         int numTokensNeeded = numNextWords - topNextTokens.Count;
         if (starterWords != null && 0 < numTokensNeeded)
-            topNextTokens.Concat(SampleReplacementWords(starterWords, numTokensNeeded));
+            topNextTokens.Concat(SampleReplacementWords(numTokensNeeded));
 
         return topNextTokens;
     }
@@ -176,14 +270,13 @@ public class GPTHelper : MonoBehaviour
     /// Finish words one by one(ordered by highest probability) and check them against a banned word list
     /// Once we get to 3 words, return them randomly
     /// </summary>
-    public IEnumerable<string> GetNextWords(InferenceSession session, GPT2Tokenizer tokenizer, string context,
-                                            int numNextWords, HashSet<string> bannedWords = null, string[] starterWords = null)
+    public IEnumerable<string> GetNextWords(string context, int numNextWords)
     {
         // Removes whitespace from the end for better performance
         // and gets a list of top tokens
         context = context.TrimEnd();
 
-        IEnumerable<string> topNextTokens = GetTopNextTokens(session, tokenizer, context, numNextWords, bannedWords: bannedWords, starterWords: starterWords);
+        IEnumerable<string> topNextTokens = GetTopNextTokens(context, numNextWords);
 
         return topNextTokens;
     }
@@ -191,11 +284,9 @@ public class GPTHelper : MonoBehaviour
     /// <summary>
     /// Case if the user is in a middle of a word and the suggestion will replace their current word.
     /// </summary>
-    public IEnumerable<string> GetWordCompletions(InferenceSession session, GPT2Tokenizer tokenizer, string context, int numNextWords, int topK = 50,
-                                   HashSet<string> bannedWords = null, string[] starterWords = null)
+    public IEnumerable<string> GetWordCompletions(string context, int numNextWords, int topK = 50)
     {
-        (string newContext, string currentWord) = SplitContextAndCurrentWord(context);
-        IEnumerable<string> topNextTokens = GetTopNextTokens(session, tokenizer, context, numNextWords, currentWord, topK, bannedWords, starterWords);
+        IEnumerable<string> topNextTokens = GetTopNextTokens(context, numNextWords, true, topK);
 
         // TODO: Consider rearranging
 
