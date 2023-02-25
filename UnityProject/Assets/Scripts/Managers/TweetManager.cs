@@ -73,7 +73,7 @@ public class TweetManager : MonoBehaviour
         }
         else
         {
-            OnNewSuggestedTweets.Invoke(suggestedWords.ToArray());
+            OnNewSuggestedTweets.Invoke(suggestedWords.Select(x => x + " ").ToArray());
             activeSuggesting = false;
         }
     }
