@@ -16,9 +16,10 @@ public class Tweet
     public int topic2Likes { get; set; }
     public int topic3Likes { get; set; }
 
+    string datetimeDisplay;
     public TweetUI ui;
 
-    public Tweet(string text, string topic1, string topic2, string topic3)
+    public Tweet(string text, string topic1, string topic2, string topic3, string datetimeDisplay)
     {
         this.text = text;
         this.daysSincePosted = 0;
@@ -28,10 +29,11 @@ public class Tweet
         this.topic1Likes = 0;
         this.topic2Likes = 0;
         this.topic3Likes = 0;
+        this.datetimeDisplay = datetimeDisplay;
     }
 
     public void UpdateTweetReactionUI()
     {
-        ui.UpdateText(text, daysSincePosted, topic1, topic2, topic3, topic1Likes, topic2Likes, topic3Likes);
+        ui.UpdateText(text, datetimeDisplay, topic1, topic2, topic3, topic1Likes, topic2Likes, topic3Likes);
     }
 }

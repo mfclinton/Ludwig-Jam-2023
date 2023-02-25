@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     public delegate void OnFollowersUpdatedHandler(int followersGained, int totalFollowers);
     public event OnFollowersUpdatedHandler OnFollowersUpdated;
 
+    public delegate void OnDayEndHandler(string dateTime);
+    public event OnDayEndHandler OnDayEnd;
+
     // Tweet objects to display in the UI
     Queue<Tweet> tweetQueue = new Queue<Tweet>(3);
     
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
         OnFollowersUpdated.Invoke(0, totalFollowers);
         // Format datetime in full day of week HH:MM AM/PM format. Example: Saturday 4:00PM
         datetimeDisplay = datetime.ToString("dddd h:mm tt");
+        OnDayEnd.Invoke(datetimeDisplay);
     }
 
     public void SubmitTweet()
@@ -51,7 +55,7 @@ public class GameManager : MonoBehaviour
             return;
 
         var activeTopics = topicManager.activeTopics;
-        Tweet newTweet = new Tweet(tweetManager.currentTweet, activeTopics[0].name, activeTopics[1].name, activeTopics[2].name);
+        Tweet newTweet = new Tweet(tweetManager.currentTweet, activeTopics[0].name, activeTopics[1].name, activeTopics[2].name, datetimeDisplay);
         tweetQueue.Enqueue(newTweet);
         OnTweetSubmitted.Invoke(newTweet);
 
@@ -134,6 +138,7 @@ public class GameManager : MonoBehaviour
         UpdateTotalFollowers(totalFollowersGained);
 
         tweetManager.ResetTweet();
+        OnDayEnd.Invoke(datetimeDisplay);
     }
 
     public void UpdateTotalFollowers(int followersGained)

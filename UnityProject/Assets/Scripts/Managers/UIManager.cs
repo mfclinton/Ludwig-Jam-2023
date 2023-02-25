@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] Sprite cootsPfp;
     [SerializeField] TextMeshProUGUI totalFollowers;
     [SerializeField] TextMeshProUGUI tweetLength;
+    [SerializeField] TextMeshProUGUI dateText;
 
     // Components
     TweetManager tweetManager;
@@ -48,6 +49,7 @@ public class UIManager : MonoBehaviour
         };
 
         gameManager.OnFollowersUpdated += (followersGained, totalFollowers) => UpdateTotalFollowers(totalFollowers);
+        gameManager.OnDayEnd += UpdateDate;
 
         topicManager.OnTrendingUpdated += UpdateTopics;
     }
@@ -106,5 +108,10 @@ public class UIManager : MonoBehaviour
     public void UpdateTotalFollowers(int count)
     {
         totalFollowers.text = count.ToString("N0") + " Followers";
+    }
+
+    public void UpdateDate(string date)
+    {
+        dateText.text = date;
     }
 }
