@@ -46,7 +46,16 @@ public class TweetManager : MonoBehaviour
 
     public void UpdateTweet(string chunk = "")
     {
-        string newTweet = currentTweet + chunk;
+        string newTweet = null;
+
+        if (TweetOnNewWord(currentTweet))
+            newTweet = currentTweet + chunk;
+        else
+        {
+            (string context, string _) = GPTHelper.SplitContextAndCurrentWord(currentTweet);
+            newTweet = context + " " + chunk;
+        }
+
         if (maxTweetLength < newTweet.Length)
             return;
 
@@ -80,9 +89,14 @@ public class TweetManager : MonoBehaviour
 
     IEnumerable<string> RequestGPTSuggestions(string tweet)
     {
-        if (tweet.EndsWith(" ") || tweet.EndsWith(".") || tweet.EndsWith(","))
+        if (TweetOnNewWord(tweet))
             return gpt.GetNextWords(tweet, numSuggestions);
         else
             return gpt.GetWordCompletions(tweet, numSuggestions);
+    }
+
+    public static bool TweetOnNewWord(string tweet)
+    {
+        return tweet.Length == 0 || tweet.EndsWith(" ") || tweet.EndsWith(".") || tweet.EndsWith(",");
     }
 }

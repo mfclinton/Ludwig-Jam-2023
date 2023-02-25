@@ -299,7 +299,7 @@ public class GPTHelper : MonoBehaviour
 
     #endregion
     #region Helpers
-    public (string, string) SplitContextAndCurrentWord(string context)
+    public static (string, string) SplitContextAndCurrentWord(string context)
     {
         // Split into context and the word to be completed
         int lastSpaceIndex = context.LastIndexOf(' ');
