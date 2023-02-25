@@ -17,12 +17,9 @@ public class UIManager : MonoBehaviour
     // Feed Helpers
     [SerializeField] Transform feedParent;
     [SerializeField] GameObject postPrefab;
-    [SerializeField] GameObject commentPrefab;
 
     // Topic Helpers
-    [SerializeField] Transform topicParent;
-    [SerializeField] GameObject topicPrefab;
-    List<GameObject> topicPool;
+    [SerializeField] TrendingTopicUI[] topicUIs;
 
     // General
     [SerializeField] Sprite cootsPfp;
@@ -41,12 +38,11 @@ public class UIManager : MonoBehaviour
         topicManager = FindObjectOfType<TopicManager>();
 
         suggestionsPool = new List<Suggestion>();
-        topicPool = new List<GameObject>();
 
         tweetManager.OnTweetUpdated += UpdateCurrentTweet;
         tweetManager.OnNewSuggestedTweets += UpdateSuggestedWords;
 
-        gameManager.OnTweetSubmitted += (tweet, topic) =>
+        gameManager.OnTweetSubmitted += (tweet) =>
         {
             NewPost(tweet);
         };
@@ -87,41 +83,28 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void NewPost(string text)
+    public void NewPost(Tweet tweet)
     {
         GameObject post = Instantiate(postPrefab, feedParent);
-        post.GetComponentInChildren<TextMeshProUGUI>().text = text;
-        post.GetComponentsInChildren<Image>().First(x => x.name == "ProfilePic").sprite = cootsPfp; // TODO: Make this better
+        TweetUI tweetUI = post.GetComponent<TweetUI>();
+        tweet.ui = tweetUI;
+
+        tweet.UpdateTweetReactionUI();
+        Destroy(feedParent.GetChild(0).gameObject);
     }
 
     public void UpdateTopics(Topic[] topics)
     {
-        while (topicParent.childCount < topics.Length)
+        var orderedTopics = topics.OrderBy(t => t.pops).ToArray();
+        for (int i = 0; i < topics.Length; i++)
         {
-            GameObject topic = Instantiate(topicPrefab, topicParent);
-            topicPool.Add(topic);
-        }
-
-        for (int i = 0; i < topicPool.Count; i++)
-        {
-            bool isActive = true;
-            if (topics.Length <= i)
-            {
-                isActive = false;
-            }
-            else
-            {
-                TextMeshProUGUI[] texts = topicPool[i].GetComponentsInChildren<TextMeshProUGUI>();
-                texts.First(t => t.gameObject.name == "Title").text = "Topic: " + topics[i].name;
-                texts.First(t => t.gameObject.name == "Info").text = topics[i].pops.ToString() + " Users";
-            }
-
-            topicPool[i].SetActive(isActive);
+            Topic t = orderedTopics[i];
+            topicUIs[i].UpdateText(t.name, t.pops);
         }
     }
 
     public void UpdateTotalFollowers(int count)
     {
-        totalFollowers.text = count.ToString() + " Followers";
+        totalFollowers.text = count.ToString("N0") + " Followers";
     }
 }

@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 
     // Events
 
-    public delegate void OnTweetSubmittedHandler(string tweet, Topic topic);
+    public delegate void OnTweetSubmittedHandler(Tweet tweet);
     public event OnTweetSubmittedHandler OnTweetSubmitted;
 
     public delegate void OnFollowersUpdatedHandler(int followersGained, int totalFollowers);
@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
 
         Tweet newTweet = new Tweet(tweetManager.currentTweet, "topic1", "topic2", "topic3");
         tweetQueue.Enqueue(newTweet);
+        OnTweetSubmitted.Invoke(newTweet);
 
         // If the tweetQueue has more than 3 tweets, remove the oldest tweet
         if (tweetQueue.Count > 3)
@@ -116,6 +117,8 @@ public class GameManager : MonoBehaviour
             {
                 totalFollowersGained += i;
             }
+
+            t.UpdateTweetReactionUI();
         }
 
         // TODO: Update current trending topics
