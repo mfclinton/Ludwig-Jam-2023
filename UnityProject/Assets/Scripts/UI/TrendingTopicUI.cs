@@ -12,6 +12,6 @@ public class TrendingTopicUI : MonoBehaviour
     public void UpdateText(string topic, int numTweets)
     {
         topicField.text = topic;
-        numTweetsField.text = numTweets.ToString("N0");
+        numTweetsField.text = numTweets.ToString("N0") + " tweets";
     }
 }

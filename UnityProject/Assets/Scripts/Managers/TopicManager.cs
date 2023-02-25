@@ -7,6 +7,7 @@ using System.Linq;
 
 public class TopicManager : MonoBehaviour
 {
+    [SerializeField] TextAsset topicsFile;
     [SerializeField] Topic[] topicPool;
     [SerializeField] int numActiveTopics;
     public Topic[] activeTopics { get; private set; }
@@ -34,5 +35,10 @@ public class TopicManager : MonoBehaviour
     {
         int[] indexes = MathUtils.Probabilities.SampleUniform(0, topicPool.Length, numSamples, withReplacement: false);
         return indexes.Select(x => topicPool[x].Clone()).ToArray();
+    }
+
+    void OnValidate()
+    {
+        
     }
 }
