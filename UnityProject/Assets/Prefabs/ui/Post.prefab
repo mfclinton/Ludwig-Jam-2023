@@ -307,8 +307,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: I want to become a big rich famous influencer! Hoping to get there with
-    some BANGER tweets
+  m_text: im gonna be the bigest influencer, its time to start trending cuz its caturday
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e86465e97ae18284e8d1adb2ca311ee9, type: 2}
   m_sharedMaterial: {fileID: 198688955762348997, guid: e86465e97ae18284e8d1adb2ca311ee9, type: 2}
@@ -335,7 +334,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22.2
+  m_fontSize: 23.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

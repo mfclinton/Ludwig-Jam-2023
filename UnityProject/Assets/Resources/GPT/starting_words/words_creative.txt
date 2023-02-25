@@ -1,7 +1,7 @@
-Aha
-BRB
-Earth
-Expert
-Heartwarming
-Monsters
-Save
+aha
+brb
+earth
+expert
+heartwarming
+monsters
+save
