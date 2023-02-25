@@ -48,3 +48,11 @@
 # Sprite References
 
 - https://www.pinterest.com/pin/619315386248540791/ (Temp Cat Paw)
+
+## Attributions
+- [GH Copilot Banned Word List ROT13 courtesy of Dolan-Gavitt](https://moyix.net/~moyix/copilot_slurs_rot13.txt) (No license)
+
+## Warnings and Limitations
+The language models we use in the project were trained on datasets known to contain profanity, lewd, and otherwise abrasive language. 
+Depending on the use case, our game may produce offensive language and socially unacceptable text. 
+In the spirit of the game jam, we hope that players of the game will not abuse the language models in the game to produce offensive text.
