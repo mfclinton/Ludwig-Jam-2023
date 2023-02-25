@@ -11,6 +11,8 @@ using System.Linq;
 
 public class TweetManager : MonoBehaviour
 {
+    public int maxTweetLength;
+
     public delegate void OnTweetUpdatedHandler(string newTweet);
     public event OnTweetUpdatedHandler OnTweetUpdated;
 
@@ -26,7 +28,6 @@ public class TweetManager : MonoBehaviour
 
     // Manage tasks
     bool activeSuggesting;
-    public string lastCurrentTweetSuggestions;
 
     private void Start()
     {
@@ -50,7 +51,11 @@ public class TweetManager : MonoBehaviour
 
     public void UpdateTweet(string chunk = "")
     {
-        currentTweet += chunk; // TODO: empty chunk shouldn't trigger a new run
+        string newTweet = currentTweet + chunk;
+        if (maxTweetLength < newTweet.Length)
+            return;
+
+        currentTweet = newTweet; // TODO: empty chunk shouldn't trigger a new run
         OnTweetUpdated.Invoke(currentTweet);
         UpdateSuggestions(currentTweet);
     }
@@ -83,7 +88,6 @@ public class TweetManager : MonoBehaviour
             }
         }
 
-        lastCurrentTweetSuggestions = tweet;
         if(currentTweet != tweet)
         {
             UpdateSuggestions(currentTweet, branching, true);

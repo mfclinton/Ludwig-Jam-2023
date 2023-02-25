@@ -27,6 +27,7 @@ public class UIManager : MonoBehaviour
     // General
     [SerializeField] Sprite cootsPfp;
     [SerializeField] TextMeshProUGUI totalFollowers;
+    [SerializeField] TextMeshProUGUI tweetLength;
 
     // Components
     TweetManager tweetManager;
@@ -58,6 +59,7 @@ public class UIManager : MonoBehaviour
     private void UpdateCurrentTweet(string text)
     {
         currentTweet.text = text + "|";
+        tweetLength.text = $"{text.Length} / {tweetManager.maxTweetLength}";
 
         for (int i = 0; i < suggestedTweetsPool.Count; i++)
         {
