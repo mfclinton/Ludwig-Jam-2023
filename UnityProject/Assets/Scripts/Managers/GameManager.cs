@@ -50,7 +50,8 @@ public class GameManager : MonoBehaviour
         if (tweet.Length == 0)
             return;
 
-        Tweet newTweet = new Tweet(tweetManager.currentTweet, "topic1", "topic2", "topic3");
+        var activeTopics = topicManager.activeTopics;
+        Tweet newTweet = new Tweet(tweetManager.currentTweet, activeTopics[0].name, activeTopics[1].name, activeTopics[2].name);
         tweetQueue.Enqueue(newTweet);
         OnTweetSubmitted.Invoke(newTweet);
 
