@@ -145,6 +145,8 @@ public class GPTHelper : MonoBehaviour
                 bannedTokens.Add(i);
         }
 
+        bannedTokens.Add(GPT2Tokenizer.MAX_TOKENS);
+
         return bannedTokens;
     }
 
