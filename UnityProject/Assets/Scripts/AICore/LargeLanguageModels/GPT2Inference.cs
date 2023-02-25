@@ -73,64 +73,6 @@ namespace AICore
             orderedZipped.RemoveRange(topK, orderedZipped.Count() - topK);
         }
 
-        /// <summary>
-        /// Constructs the next n most likely tokens in a sequence given an input string
-        /// </summary>
-        public static List<(float, string)> RecommendedNextWords(InferenceSession session, Tokenizer tokenizer, string input, int branches,
-                                                                 float sensitivity = 0.1f, int maxWordCount = 8)
-        {
-            List<(float, string)> completedWords = new List<(float, string)>();
-            Queue<(float, string)> queuedWords = new Queue<(float, string)>();
-
-            long[] encodedInputSeq = tokenizer.Encode(input);
-            float[] logits = CausalLMPrediction(session, encodedInputSeq);
-            List<(float, int)> probs = ProcessLogits(logits, topK: branches);
-
-            probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
-
-            while (queuedWords.Count() != 0 && completedWords.Count < maxWordCount)
-            {
-                (float p, string chunk) = queuedWords.Dequeue();
-
-                encodedInputSeq = tokenizer.Encode(input + chunk);
-                logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
-                probs = ProcessLogits(logits, topK: branches);
-
-                long[] temp = new long[1];
-                foreach ((float prob, int index) in probs)
-                {
-                    if (index == GPT2Inference.EOS_TOKEN)
-                        continue;
-
-                    temp[0] = index;
-                    string newChunk = tokenizer.Decode(temp);
-                    string newWord = chunk + newChunk;
-
-                    if (newChunk.StartsWith(" "))
-                    {
-                        completedWords.Add((p * prob, chunk));
-                    }
-                    else if (newWord.EndsWith(" ") || newWord.EndsWith("."))
-                    {
-                        completedWords.Add((p * prob, newWord));
-                    }
-                    else
-                    {
-                        queuedWords.Enqueue((p * prob, newWord));
-                    }
-                }
-            }
-
-            SortedDictionary<string, float> setOfWordProbs = new SortedDictionary<string, float>();
-            completedWords.ForEach(x => {
-                if (!setOfWordProbs.ContainsKey(x.Item2))
-                    setOfWordProbs[x.Item2] = x.Item1;
-                else
-                    setOfWordProbs[x.Item2] += x.Item1;
-            });
-            List<(float, string)> wordProbs = MathUtils.Probabilities.CalculateProbs(setOfWordProbs.Select(x => (x.Value, x.Key)).ToList(), sensitivity);
-            return wordProbs;
-        }
     }
 
    
