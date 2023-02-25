@@ -22,8 +22,7 @@ public class TweetManager : MonoBehaviour
     public string currentTweet { get; private set; }
     public int numSuggestions { get; private set; }
 
-    InferenceSession session;
-    GPT2Tokenizer tokenizer;
+    GPTHelper gpt;
     TopicManager topicManager;
 
     // Manage tasks
@@ -31,11 +30,7 @@ public class TweetManager : MonoBehaviour
 
     private void Start()
     {
-        // ML Setup
-        string MODEL_PATH_GPT2_OPENAI = @"/StreamingAssets/AIModels/LLMs/GPTDecoders/GPT2OpenAI/model.onnx";
-        string modelPath = Application.dataPath + MODEL_PATH_GPT2_OPENAI;
-        session = new InferenceSession(modelPath);
-        tokenizer = new GPT2Tokenizer();
+        gpt = FindObjectOfType<GPTHelper>();
         topicManager = FindObjectOfType<TopicManager>();
 
         numSuggestions = 3;
@@ -66,27 +61,11 @@ public class TweetManager : MonoBehaviour
             return;
         activeSuggesting = true;
 
-        string[] suggestedWords = new string[numSuggestions];
+        IEnumerable<string> suggestedWords = null;
         if (tweet.Length == 0)
-        {
-            int[] indexes = MathUtils.Probabilities.SampleUniform(0, topicManager.activeTopics.Length, numSuggestions, withReplacement: false);
-            for (int i = 0; i < numSuggestions; i++)
-            {
-                suggestedWords[i] = topicManager.activeTopics[indexes[i]].name;
-            }
-        }
+            suggestedWords = gpt.SampleReplacementWords(numSuggestions);
         else
-        {
-            var wordProbs = await Task.Run(() => GPT2Inference.RecommendedNextWords(session, tokenizer, tweet, branching));
-
-            float totalProb = 1f;
-            for (int i = 0; i < numSuggestions; i++)
-            {
-                (float prob, string word) = MathUtils.Probabilities.Sample(wordProbs, totalProb);
-                suggestedWords[i] = word;
-                totalProb -= prob;
-            }
-        }
+            suggestedWords = await Task.Run(() => RequestGPTSuggestions(tweet));
 
         if(currentTweet != tweet)
         {
@@ -94,8 +73,16 @@ public class TweetManager : MonoBehaviour
         }
         else
         {
-            OnNewSuggestedTweets.Invoke(suggestedWords);
+            OnNewSuggestedTweets.Invoke(suggestedWords.ToArray());
             activeSuggesting = false;
         }
+    }
+
+    IEnumerable<string> RequestGPTSuggestions(string tweet)
+    {
+        if (tweet.EndsWith(" ") || tweet.EndsWith(".") || tweet.EndsWith(","))
+            return gpt.GetNextWords(tweet, numSuggestions);
+        else
+            return gpt.GetWordCompletions(tweet, numSuggestions);
     }
 }

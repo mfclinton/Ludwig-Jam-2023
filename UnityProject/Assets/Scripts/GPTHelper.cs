@@ -22,7 +22,7 @@ public class GPTHelper : MonoBehaviour
     HashSet<long> bannedTokens;
     HashSet<string> bannedWords;
 
-    private void Start()
+    private void Awake()
     {
         (session, tokenizer) = LoadModel();
 
@@ -30,82 +30,82 @@ public class GPTHelper : MonoBehaviour
         bannedTokens = ComputeBannedTokens();
         bannedWords = LoadBannedWords();
 
-        string[] test_next_words = new string[]{
-            "this is an apple. ",
-            "i have an apple, banana,",
-            "my best ",
-            "allen just sent a spaceship to the ",
-            "i can't ",
-            "i don't know what to do ",
-            "how are my cats ",
-            "mario is a cool ",
-            "i just ",
-            "when does ",
-            "i forgot my ",
-            "the door creaked ",
-            "she whispered ",
-            "the coffee was ",
-            "i need more ",
-            "the car won't ",
-            "i love to ",
-            "the sky is ",
-            "my favorite color is ",
-            "the rain is ",
-            "he always ",
-            "i'm allergic to ",
-            "the movie made me ",
-            "the cat meowed ",
-            "the phone rang ",
-            "the tree swayed ",
-            "the music played ",
-            "the pen ran out of ",
-            "the book fell ",
-            "the fire crackled ",
-        };
+        //string[] test_next_words = new string[]{
+        //    "this is an apple. ",
+        //    "i have an apple, banana,",
+        //    "my best ",
+        //    "allen just sent a spaceship to the ",
+        //    "i can't ",
+        //    "i don't know what to do ",
+        //    "how are my cats ",
+        //    "mario is a cool ",
+        //    "i just ",
+        //    "when does ",
+        //    "i forgot my ",
+        //    "the door creaked ",
+        //    "she whispered ",
+        //    "the coffee was ",
+        //    "i need more ",
+        //    "the car won't ",
+        //    "i love to ",
+        //    "the sky is ",
+        //    "my favorite color is ",
+        //    "the rain is ",
+        //    "he always ",
+        //    "i'm allergic to ",
+        //    "the movie made me ",
+        //    "the cat meowed ",
+        //    "the phone rang ",
+        //    "the tree swayed ",
+        //    "the music played ",
+        //    "the pen ran out of ",
+        //    "the book fell ",
+        //    "the fire crackled ",
+        //};
 
-        string[] test_middle_words = new string[]{
-            "the door crea",
-            "my be",
-            "my n",
-            "allen just sent a spaceship to th",
-            "i can",
-            "i don't know what to d",
-            "how are my ca",
-            "mario is a co",
-            "i jus",
-            "when doe",
-            "i forgot m",
-            "she whispe",
-            "the coffee wa",
-            "i need mor",
-            "the car won",
-            "i love t",
-            "the sky i",
-            "my favorite color i",
-            "he alw",
-            "the movie made m",
-            "the cat me",
-            "the phone ran",
-            "the tree swaye",
-            "the music pla",
-            "the pen ran out o",
-            "the book fe",
-            "the fire cra",
-        };
+        //string[] test_middle_words = new string[]{
+        //    "the door crea",
+        //    "my be",
+        //    "my n",
+        //    "allen just sent a spaceship to th",
+        //    "i can",
+        //    "i don't know what to d",
+        //    "how are my ca",
+        //    "mario is a co",
+        //    "i jus",
+        //    "when doe",
+        //    "i forgot m",
+        //    "she whispe",
+        //    "the coffee wa",
+        //    "i need mor",
+        //    "the car won",
+        //    "i love t",
+        //    "the sky i",
+        //    "my favorite color i",
+        //    "he alw",
+        //    "the movie made m",
+        //    "the cat me",
+        //    "the phone ran",
+        //    "the tree swaye",
+        //    "the music pla",
+        //    "the pen ran out o",
+        //    "the book fe",
+        //    "the fire cra",
+        //};
 
-        Debug.Log("--Next Word Test--");
-        foreach (string context in test_next_words)
-        {
-            string result = string.Join(", ", GetNextWords(context, 3));
-            Debug.Log($"{context} | {result}");
-        }
+        //Debug.Log("--Next Word Test--");
+        //foreach (string context in test_next_words)
+        //{
+        //    string result = string.Join(", ", GetNextWords(context, 3));
+        //    Debug.Log($"{context} | {result}");
+        //}
 
-        Debug.Log("--Middle Word Test--");
-        foreach (string context in test_middle_words)
-        {
-            string result = string.Join(", ", GetWordCompletions(context, 3));
-            Debug.Log($"{context} | {result}");
-        }
+        //Debug.Log("--Middle Word Test--");
+        //foreach (string context in test_middle_words)
+        //{
+        //    string result = string.Join(", ", GetWordCompletions(context, 3));
+        //    Debug.Log($"{context} | {result}");
+        //}
 
     }
 
@@ -123,9 +123,9 @@ public class GPTHelper : MonoBehaviour
     #region Data Prep
     public IEnumerable<string> LoadStarterWords()
     {
-        LinkedList<string> starterWords = new LinkedList<string>();
+        IEnumerable<string> starterWords = new LinkedList<string>();
         foreach (TextAsset ta in starterWordFiles)
-            starterWords.Concat(ta.text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries));
+            starterWords = starterWords.Concat(ta.text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries));
 
         return starterWords;
     }
@@ -177,7 +177,7 @@ public class GPTHelper : MonoBehaviour
     
     public IEnumerable<string> SampleReplacementWords(int numWords)
     {
-        int[] indexes = Probabilities.SampleUniform(0, starterWordFiles.Length, numWords, withReplacement: false);
+        int[] indexes = Probabilities.SampleUniform(0, starterWords.Length, numWords, withReplacement: false);
         return indexes.Select((i) => starterWords[i]);
     }
 
@@ -186,6 +186,10 @@ public class GPTHelper : MonoBehaviour
         // Encodes the text to logits
         long[] encodedInputSeq = tokenizer.Encode(context);
         float[] logits = AICore.GPT2Inference.CausalLMPrediction(session, encodedInputSeq);
+        foreach(long bannedToken in bannedTokens)
+        {
+            logits[bannedToken] = -99999;
+        }
 
         // Softmaxes to get token probabilities
         List<(float, int)> probs = AICore.GPT2Inference.ProcessLogits(logits, topK); // TODO: Can we make this more efficient?

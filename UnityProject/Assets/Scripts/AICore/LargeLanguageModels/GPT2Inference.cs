@@ -72,9 +72,5 @@ namespace AICore
         {
             orderedZipped.RemoveRange(topK, orderedZipped.Count() - topK);
         }
-
     }
-
-   
-    
 }
