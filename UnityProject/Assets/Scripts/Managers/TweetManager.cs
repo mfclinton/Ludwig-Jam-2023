@@ -40,14 +40,12 @@ public class TweetManager : MonoBehaviour
 
     public void ResetTweet()
     {
-        currentTweet = ""; // TODO
-        UpdateTweet();
+        UpdateTweet("");
     }
 
-    public void UpdateTweet(string chunk = "")
+    public void UseSuggestion(string chunk = "")
     {
         string newTweet = null;
-
         if (TweetOnNewWord(currentTweet))
             newTweet = currentTweet + chunk;
         else
@@ -56,6 +54,18 @@ public class TweetManager : MonoBehaviour
             newTweet = context + " " + chunk;
         }
 
+        UpdateTweet(newTweet);
+    }
+
+    public void UseKey(string chunk = "")
+    {
+        string newTweet = currentTweet + chunk;
+
+        UpdateTweet(newTweet);
+    }
+
+    public void UpdateTweet(string newTweet)
+    {
         if (maxTweetLength < newTweet.Length)
             return;
 

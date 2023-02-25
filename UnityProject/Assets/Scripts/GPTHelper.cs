@@ -207,7 +207,7 @@ public class GPTHelper : MonoBehaviour
             // Samples the next token deterministically
             // TODO: Do we want to complete words deterministically?
             string tempContext = context + " " + currentWord;
-            string nextToken = SampleTokens(context, topK: 1).First();
+            string nextToken = SampleTokens(tempContext, topK: 1).First();
 
             // A space, period or comma in the next token indicates the word is over
             if (nextToken[0] == ',' || nextToken[0] == '.' || nextToken[0] == ' ')
@@ -303,6 +303,8 @@ public class GPTHelper : MonoBehaviour
     {
         // Split into context and the word to be completed
         int lastSpaceIndex = context.LastIndexOf(' ');
+        if (lastSpaceIndex == -1)
+            return ("", context);
 
         string currentWord = context.Substring(lastSpaceIndex + 1, context.Length - lastSpaceIndex - 1);
         string newContext = context.Substring(0, lastSpaceIndex);

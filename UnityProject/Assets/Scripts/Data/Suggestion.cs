@@ -17,7 +17,7 @@ public class Suggestion : MonoBehaviour
         button = GetComponent<Button>();
         TweetManager tweetManager = FindObjectOfType<TweetManager>();
 
-        button.onClick.AddListener(() => tweetManager.UpdateTweet(text));
+        button.onClick.AddListener(() => tweetManager.UseSuggestion(text));
     }
 
     public void SetText(string text)
