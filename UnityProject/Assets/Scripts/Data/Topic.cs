@@ -11,7 +11,8 @@ public class Topic
     public string name;
     public int pops;
 
-    Normal normal_dist = new Normal(2500, 500);
+    Normal normal_dist = new Normal(3000, 1000);
+    Normal normal_dist_degradation = new Normal(750, 300);
 
     public Topic(string name, int pops)
     {
@@ -26,5 +27,14 @@ public class Topic
         return new Topic(name, pops);
     }
 
+    public void degradePops()
+    {
+        int pops_to_remove = (int)normal_dist_degradation.Sample();
+        this.pops -= pops_to_remove;
+        if (this.pops < 100)
+        {
+            this.pops = 100;
+        }
+    }
   
 }

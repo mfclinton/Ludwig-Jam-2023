@@ -118,6 +118,10 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // TODO: Update current trending topics
+        // With 1/3 probability, choose to discard a trending topic and sample a new one
+        // Make sure to call Topic.degradePops() on each non discarded topic
+        
         //Advance time by 2 hours
         datetime = datetime.AddHours(2);
         datetimeDisplay = datetime.ToString("dddd h:mm tt");
