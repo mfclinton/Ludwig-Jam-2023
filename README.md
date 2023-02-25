@@ -51,6 +51,7 @@
 
 ## Attributions
 - [GH Copilot Banned Word List ROT13 courtesy of Dolan-Gavitt](https://moyix.net/~moyix/copilot_slurs_rot13.txt) (No license)
+- Music from Pixabay: [1](https://pixabay.com/music/beats-lo-fi-beauty-99516/), [2](https://pixabay.com/music/beats-sweet-chillhop-113777/), [3](https://pixabay.com/music/beats-lo-fi-chillhop-beat-background-music-133473/), [4](https://pixabay.com/music/beats-lofi-study-112191/), [5](https://pixabay.com/music/beats-breeze-soothing-lo-fi-music-78bpm-13596/), [6](https://pixabay.com/music/beats-relaxed-vlog-night-street-131746/) (Pixabay Simplified License)
 
 ## Warnings and Limitations
 The language models we use in the project were trained on datasets known to contain profanity, lewd, and otherwise abrasive language. 
