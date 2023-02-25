@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Random;
 
 [System.Serializable]
 public class Topic
 {
     public string name;
-    public int[] pops;
+    public int pops;
 
-    public Topic(string name, int[] pops)
+    Normal normal_dist = new Normal(2500, 500);
+
+    public Topic(string name, int pops)
     {
         this.name = name;
-        this.pops = pops;
+        this.pops = (int)normal_dist.Sample();
+        if (this.pops < 5)
+            this.pops = 5;
     }
 
     public Topic Clone()
@@ -20,26 +26,5 @@ public class Topic
         return new Topic(name, pops);
     }
 
-    // TODO: put a call here to update topics when this is modified
-    public int ModifyPopulation(int index, int num)
-    {
-        int absPopChange = Mathf.Min(Mathf.Abs(num), Mathf.Abs(pops[index]));
-
-        if (pops[index] < 0)
-            pops[index] += absPopChange;
-        else if (0 < pops[index])
-            pops[index] -= absPopChange;
-
-        return absPopChange;
-    }
-
-    public int TotalFollowers()
-    {
-        return pops.Sum(x => Mathf.Abs(x));
-    }
-
-    public bool IsExhausted()
-    {
-        return pops.Any(x => x != 0);
-    }
+  
 }

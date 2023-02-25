@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
     // Data
 
-    int totalFollowers = 0;
+    int totalFollowers = 319;
+    DateTime datetime = DateTime.Parse("2023-02-25 08:00:00");
+    string datetimeDisplay;
+
 
     // Components
 
@@ -22,6 +26,10 @@ public class GameManager : MonoBehaviour
     public delegate void OnFollowersUpdatedHandler(int followersGained, int totalFollowers);
     public event OnFollowersUpdatedHandler OnFollowersUpdated;
 
+    // Tweet objects to display in the UI
+    Queue<Tweet> tweetQueue = new Queue<Tweet>(3);
+    
+
     private void Awake()
     {
         tweetManager = FindObjectOfType<TweetManager>();
@@ -32,6 +40,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         OnFollowersUpdated.Invoke(0, totalFollowers);
+        // Format datetime in full day of week HH:MM AM/PM format. Example: Saturday 4:00PM
+        datetimeDisplay = datetime.ToString("dddd h:mm tt");
     }
 
     public void SubmitTweet()
@@ -40,14 +50,82 @@ public class GameManager : MonoBehaviour
         if (tweet.Length == 0)
             return;
 
-        Topic topic = eval.MatchTopic(tweet, topicManager.activeTopics);
-       
-        int followersGained = eval.EvaluateTweet(tweet, topic);
-        UpdateTotalFollowers(followersGained);
-        
+        Tweet newTweet = new Tweet(tweetManager.currentTweet, "topic1", "topic2", "topic3");
+        tweetQueue.Enqueue(newTweet);
+
+        // If the tweetQueue has more than 3 tweets, remove the oldest tweet
+        if (tweetQueue.Count > 3)
+            tweetQueue.Dequeue();
+
+        // Get the trending topics
+        Topic[] trendingTopics = topicManager.activeTopics;
+
+        // Get the number of tweets for each topic
+        int[] tweets_each = new int[3];
+        for (int i = 0; i < 3; i++)
+        {
+            tweets_each[i] = trendingTopics[i].pops;
+        }
+
+        // For each tweet in the queue
+        int totalFollowersGained = 0;
+        foreach (Tweet t in tweetQueue)
+        {
+            // For each topic, compute its probability given the tweet text
+            float[] topicProbs = new float[3];
+            for (int i = 0; i < 3; i++)
+            {
+                topicProbs[i] = eval.GetTopicProb(t.text, trendingTopics[i]);
+            }
+
+            // Sum of tweets_each
+            float sum_tweets_each = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                sum_tweets_each += tweets_each[i];
+            }
+
+            // Normalize the tweets per topic
+            float[] relative_tweets_each = new float[3];
+            for (int i = 0; i < 3; i++)
+            {
+                relative_tweets_each[i] = tweets_each[i] / sum_tweets_each;
+            }
+
+            // Add the number of followers gained from each topic
+            int[] per_topic_followers = new int[3];
+            for (int i = 0; i < 3; i++)
+            {
+                per_topic_followers[i] = (int)(topicProbs[i] * relative_tweets_each[i] * totalFollowers);
+            }
+
+            t.daysSincePosted += 1;
+            // Scale by days since posted (limit this to 3)
+            for (int i = 0; i < 3; i++)
+            {
+                per_topic_followers[i] = (int)(per_topic_followers[i] / t.daysSincePosted);
+            }
+
+            // Update the total number of followers in the tweet
+            t.topic1Likes += per_topic_followers[0];
+            t.topic2Likes += per_topic_followers[1];
+            t.topic2Likes += per_topic_followers[2];
+
+            //Update the total follower count
+            foreach (int i in per_topic_followers)
+            {
+                totalFollowersGained += i;
+            }
+        }
+
+        //Advance time by 2 hours
+        datetime = datetime.AddHours(2);
+        datetimeDisplay = datetime.ToString("dddd h:mm tt");
+
+        //Update total followers
+        UpdateTotalFollowers(totalFollowersGained);
+
         tweetManager.ResetTweet();
-        OnTweetSubmitted.Invoke(tweet, topic);
-        topicManager.UpdateActiveTopics(); // TODO: Move this
     }
 
     public void UpdateTotalFollowers(int followersGained)

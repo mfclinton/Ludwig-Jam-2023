@@ -32,8 +32,8 @@ public class Evaluator
         Topic topic = topics[probs.IndexOf(probs.Max())];
         return topic;
     }
-
-    private float GetTopicProb(string tweet, Topic topic)
+    
+    public float GetTopicProb(string tweet, Topic topic)
     {
         List<long> encodedInputSeq = topicTokenizer.Encode(tweet, topic.name).ToList();
         float[] logits = RobertaSentiment.ClassificationLMPrediction(topicSession, encodedInputSeq.ToArray()); // 1 x 3
@@ -49,22 +49,4 @@ public class Evaluator
         return probs;
     }
 
-    /// <summary>
-    /// Evaluates a tweets and returns the change in followers that occurs
-    /// </summary>
-    public int EvaluateTweet(string tweet, Topic topic)
-    {
-        float[] probs = GetSentimentProbs(tweet);
-
-        int totalPopsGained = 0;
-        for (int i = 0; i < probs.Length; i++)
-        {
-            float p = probs[i];
-            int pop = topic.pops[i];
-            int popChange = Mathf.RoundToInt(p * pop);
-            totalPopsGained += topic.ModifyPopulation(i, popChange);
-        }
-
-        return totalPopsGained;
-    }
 }

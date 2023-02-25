@@ -5,25 +5,26 @@ using UnityEngine;
 public class Tweet
 {
     public string text { get; private set; }
-    public int retweets { get; private set; }
-    public int likes { get; private set; }
-    public int views { get; private set; }
-    public LinkedList<Comment> comments { get; private set; }
 
-    public Tweet(string text)
+    public int daysSincePosted { get; set; }
+
+    public string topic1 { get; set; }
+    public string topic2 { get; set; }
+    public string topic3 { get; set; }
+
+    public int topic1Likes { get; set; }
+    public int topic2Likes { get; set; }
+    public int topic3Likes { get; set; }
+
+    public Tweet(string text, string topic1, string topic2, string topic3)
     {
         this.text = text;
-    }
-
-    public void UpdateStats(int retweets, int likes, int views)
-    {
-        this.retweets += retweets;
-        this.likes += likes;
-        this.views += views;
-    }
-
-    public void AddComment(Comment c)
-    {
-        this.comments.AddLast(c);
+        this.daysSincePosted = 0;
+        this.topic1 = topic1;
+        this.topic2 = topic2;
+        this.topic3 = topic3;
+        this.topic1Likes = 0;
+        this.topic2Likes = 0;
+        this.topic3Likes = 0;
     }
 }

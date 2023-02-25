@@ -113,7 +113,7 @@ public class UIManager : MonoBehaviour
             {
                 TextMeshProUGUI[] texts = topicPool[i].GetComponentsInChildren<TextMeshProUGUI>();
                 texts.First(t => t.gameObject.name == "Title").text = "Topic: " + topics[i].name;
-                texts.First(t => t.gameObject.name == "Info").text = topics[i].TotalFollowers().ToString() + " Users";
+                texts.First(t => t.gameObject.name == "Info").text = topics[i].pops.ToString() + " Users";
             }
 
             topicPool[i].SetActive(isActive);
