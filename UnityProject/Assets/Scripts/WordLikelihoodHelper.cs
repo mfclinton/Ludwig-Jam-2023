@@ -13,28 +13,27 @@ public class WordLikelihoodHelper : MonoBehaviour
     void Awake()
     {
         words = LoadWords();
-        int levenshteinDistance = Fastenshtein.Levenshtein.Distance("value1", "value2");
 
-        string[] misspelled_words = new string[] {
-            "x",
-            "xy",
-            "tst",
-            "accomodate",
-            "recieve",
-            "apele",
-            "aple",
-            "rythm",
-            "banjana",
-            "ghist",
-            "flopeer",
-        };
+        //string[] misspelled_words = new string[] {
+        //    "x",
+        //    "xy",
+        //    "tst",
+        //    "accomodate",
+        //    "recieve",
+        //    "apele",
+        //    "aple",
+        //    "rythm",
+        //    "banjana",
+        //    "ghist",
+        //    "flopeer",
+        //};
 
-        foreach(string word in misspelled_words)
-        {
-            IEnumerable<(string, double)> topResults = GetTopWords(word, 2).Take(3);
-            string resultStr = string.Join(",", topResults);
-            Debug.Log($"{word} | {resultStr}");
-        }
+        //foreach(string word in misspelled_words)
+        //{
+        //    IEnumerable<(string, double)> topResults = GetTopWords(word, 2).Take(3);
+        //    string resultStr = string.Join(",", topResults);
+        //    Debug.Log($"{word} | {resultStr}");
+        //}
     }
 
     public List<(string, double)> LoadWords()
@@ -54,18 +53,27 @@ public class WordLikelihoodHelper : MonoBehaviour
         return words;
     }
 
-    public IEnumerable<(string, double)> GetTopWords(string word, int maxDist)
+    public IEnumerable<string> GetTopWords(string word, int wordsNeeded, int maxDist = 3)
     {
-        List<(string, double)> validWords = new List<(string, double)>();
-        foreach((string w, double p) in words)
+        List<(string, double)>[] validWords = new List<(string, double)>[maxDist + 1];
+        for (int i = 0; i < validWords.Length; i++)
+            validWords[i] = new List<(string, double)>();
+
+        foreach ((string w, double p) in words)
         {
             int dist = Fastenshtein.Levenshtein.Distance(word, w);
             if (dist <= maxDist)
-                validWords.Add((w, p));
+                validWords[dist].Add((w, p * dist));
         }
 
-        validWords.OrderByDescending(tup => tup.Item2);
+        IEnumerable<string> returnedWords = new List<string>();
+        for (int i = 0; i < validWords.Length; i++)
+        {
+            int wordsRemaining = wordsNeeded - returnedWords.Count();
+            var distIWords = validWords[i].OrderByDescending(tup => tup.Item2);
+            returnedWords = returnedWords.Concat(distIWords.Take(wordsRemaining).Select(tup => tup.Item1));
+        }
 
-        return validWords;
+        return returnedWords;
     }
 }

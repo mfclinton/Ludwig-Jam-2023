@@ -21,8 +21,11 @@ public class TweetManager : MonoBehaviour
 
     public string currentTweet { get; private set; }
     public int numSuggestions { get; private set; }
+    public int maxCorrectingDist { get; private set; }
 
     GPTHelper gpt;
+    WordLikelihoodHelper wlh;
+
     TopicManager topicManager;
 
     // Manage tasks
@@ -31,9 +34,11 @@ public class TweetManager : MonoBehaviour
     private void Start()
     {
         gpt = FindObjectOfType<GPTHelper>();
+        wlh = FindObjectOfType<WordLikelihoodHelper>();
         topicManager = FindObjectOfType<TopicManager>();
 
         numSuggestions = 3;
+        maxCorrectingDist = 2;
 
         ResetTweet();
     }
@@ -74,7 +79,7 @@ public class TweetManager : MonoBehaviour
         UpdateSuggestions(currentTweet);
     }
 
-    async void UpdateSuggestions(string tweet, int branching = 3, bool overrideActive = false)
+    async void UpdateSuggestions(string tweet, bool overrideActive = false)
     {
         if (activeSuggesting && !overrideActive)
             return;
@@ -86,9 +91,13 @@ public class TweetManager : MonoBehaviour
         else
             suggestedWords = await Task.Run(() => RequestGPTSuggestions(tweet));
 
+        int wordsNeeds = numSuggestions - suggestedWords.Count();
+        if (0 < wordsNeeds)
+            suggestedWords = suggestedWords.Concat(gpt.SampleReplacementWords(wordsNeeds));
+
         if(currentTweet != tweet)
         {
-            UpdateSuggestions(currentTweet, branching, true);
+            UpdateSuggestions(currentTweet, true);
         }
         else
         {
@@ -102,7 +111,11 @@ public class TweetManager : MonoBehaviour
         if (TweetOnNewWord(tweet))
             return gpt.GetNextWords(tweet, numSuggestions);
         else
-            return gpt.GetWordCompletions(tweet, numSuggestions);
+        {
+            (string context, string word) = GPTHelper.SplitContextAndCurrentWord(currentTweet);
+            return wlh.GetTopWords(word, numSuggestions);
+            // return gpt.GetWordCompletions(tweet, numSuggestions);
+        }
     }
 
     public static bool TweetOnNewWord(string tweet)
