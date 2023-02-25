@@ -10,6 +10,7 @@ namespace AICore
     /// https://huggingface.co/course/chapter6/5?fw=pt
     public class GPT2Tokenizer : Tokenizer
     {
+        public const int MAX_TOKENS = 50256;
         Tokenizer tokenizer;
 
         public GPT2Tokenizer()

@@ -271,7 +271,5 @@ if __name__ == "__main__":
     for test_scenario in test_next_words:
         pretty_print_next_words(test_scenario, get_next_words(test_scenario))
 
-    print()
-
     for test_scenario in test_middle_words:
         pretty_print_next_words(test_scenario, get_word_completions(test_scenario))

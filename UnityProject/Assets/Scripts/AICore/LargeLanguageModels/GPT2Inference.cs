@@ -52,7 +52,7 @@ namespace AICore
         /// <summary>
         /// Returns an ordered (probability, tokenIndex) pairs given an array of logits
         /// </summary>
-        static List<(float, int)> ProcessLogits(float[] logits, int topK = 1)
+        public static List<(float, int)> ProcessLogits(float[] logits, int topK = 1)
         {
             int[] indexes = Enumerable.Range(0, logits.Length).ToArray();
             IEnumerable<(float, int)> zipped = logits.Zip(indexes, (log, idx) => (log, idx));
@@ -82,8 +82,8 @@ namespace AICore
             List<(float, string)> completedWords = new List<(float, string)>();
             Queue<(float, string)> queuedWords = new Queue<(float, string)>();
 
-            List<long> encodedInputSeq = tokenizer.Encode(input).ToList();
-            float[] logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
+            long[] encodedInputSeq = tokenizer.Encode(input);
+            float[] logits = CausalLMPrediction(session, encodedInputSeq);
             List<(float, int)> probs = ProcessLogits(logits, topK: branches);
 
             probs.ForEach(x => queuedWords.Enqueue((x.Item1, tokenizer.Decode(new long[] { x.Item2 }))));
@@ -92,7 +92,7 @@ namespace AICore
             {
                 (float p, string chunk) = queuedWords.Dequeue();
 
-                encodedInputSeq = tokenizer.Encode(input + chunk).ToList();
+                encodedInputSeq = tokenizer.Encode(input + chunk);
                 logits = CausalLMPrediction(session, encodedInputSeq.ToArray());
                 probs = ProcessLogits(logits, topK: branches);
 
