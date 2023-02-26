@@ -115,7 +115,7 @@ public class GameManager : MonoBehaviour
             // Update the total number of followers in the tweet
             t.topic1Likes += per_topic_followers[0];
             t.topic2Likes += per_topic_followers[1];
-            t.topic2Likes += per_topic_followers[2];
+            t.topic3Likes += per_topic_followers[2];
 
             //Update the total follower count
             foreach (int i in per_topic_followers)
