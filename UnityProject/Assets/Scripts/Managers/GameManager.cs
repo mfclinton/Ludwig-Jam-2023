@@ -86,9 +86,6 @@ public class GameManager : MonoBehaviour
                 topicProbs[i] = eval.GetTopicProb(t.text, trendingTopics[i]);
             }
 
-            float sum = topicProbs.Sum();
-            topicProbs = topicProbs.Select(x => x / sum).ToArray();
-
             // Sum of tweets_each
             float sum_tweets_each = 0;
             for (int i = 0; i < 3; i++)
