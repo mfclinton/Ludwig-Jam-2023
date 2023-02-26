@@ -16,3 +16,16 @@ podcast
 FRIDAY
 controversy
 greedy
+music
+cooking
+learning
+creativity
+space
+travel
+culture
+science
+nature
+wellness
+exploration
+animals
+fiction
