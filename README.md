@@ -2,7 +2,7 @@
 **Download the game on [itch.io](https://unitedfailures.itch.io/its-caturday).** This game was made for [Ludwig Jam 2023](https://itch.io/jam/ludwig-2023).
 
 Play as coots on her journey to be a social media influencer! 
-Coots is trying to write posts about trending topics, but her paws are making it difficult to use a regular keyboard!
+*its Caturday* morning and coots has decided to try and to write posts about trending topics, but her paws are making it difficult to use a regular keyboard!
 
 The game is powered by the same underlying AI model architecture as ChatGPT (transformer-based language models) to suggest next words based on the current written tweet. We also use transformers to determine how to score tweets with respect to the trending topics.
 As far as we know, this is one of the first games written in Unity to perform local inference on transformer-based language models. We hope that this can serve as an example and inspiration for other Unity developers to use state-of-the-art AI models in their games.
