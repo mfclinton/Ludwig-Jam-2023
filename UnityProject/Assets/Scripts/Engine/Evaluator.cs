@@ -10,7 +10,7 @@ using MathUtils;
 
 public class Evaluator
 {
-    InferenceSession sentimentSession, topicSession;
+    InferenceSession topicSession;
     Tokenizer sentimentTokenizer;
     RobertaMNLITokenizer topicTokenizer;
 
@@ -19,7 +19,6 @@ public class Evaluator
         string sentimentModelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/TwitterSentiment/model.onnx";
         string topicModelPath = Application.dataPath + @"/StreamingAssets/AIModels/LLMs/Roberta/LargeMNLI/model.onnx";
 
-        sentimentSession = new InferenceSession(sentimentModelPath);
         sentimentTokenizer = new RobertaTokenizer();
 
         topicSession = new InferenceSession(topicModelPath);
@@ -39,14 +38,6 @@ public class Evaluator
         float[] logits = RobertaSentiment.ClassificationLMPrediction(topicSession, encodedInputSeq.ToArray()); // 1 x 3
         float[] probs = MathUtils.Probabilities.CalculateProbs(new float[] { logits[0], logits[1] });
         return probs[1];
-    }
-
-    private float[] GetSentimentProbs(string tweet)
-    {
-        List<long> encodedInputSeq = sentimentTokenizer.Encode(tweet).ToList();
-        float[] logits = RobertaSentiment.ClassificationLMPrediction(sentimentSession, encodedInputSeq.ToArray());
-        float[] probs = MathUtils.Probabilities.CalculateProbs(logits);
-        return probs;
     }
 
 }
