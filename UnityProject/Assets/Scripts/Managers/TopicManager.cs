@@ -28,6 +28,21 @@ public class TopicManager : MonoBehaviour
 
     public void UpdateActiveTopics()
     {
+        for (int i = 0; i < activeTopics.Length; i++)
+        {
+            float rng = UnityEngine.Random.value;
+            if(rng < 0.33)
+            {
+                int newTopicIndex = UnityEngine.Random.Range(0, activeTopics.Length);
+                activeTopics[i] = topicPool[newTopicIndex].Clone();
+            }
+            else
+            {
+                Topic oldTopic = activeTopics[i];
+                oldTopic.degradePops();
+            }
+        }
+
         OnTrendingUpdated.Invoke(activeTopics);
     }
 
