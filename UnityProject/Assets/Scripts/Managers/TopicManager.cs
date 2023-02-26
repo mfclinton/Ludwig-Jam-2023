@@ -39,6 +39,13 @@ public class TopicManager : MonoBehaviour
 
     void OnValidate()
     {
-        
+        string[] lines = topicsFile.text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+        List<Topic> newTopics = new List<Topic>();
+        foreach(string l in lines)
+        {
+            newTopics.Add(new Topic(l.Trim(), 0));
+        }
+
+        topicPool = newTopics.ToArray();
     }
 }
