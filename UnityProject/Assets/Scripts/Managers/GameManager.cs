@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class GameManager : MonoBehaviour
     int totalFollowers = 319;
     DateTime datetime = DateTime.Parse("2023-02-25 08:00:00");
     string datetimeDisplay;
+    public float dampener;
 
 
     // Components
@@ -84,6 +86,9 @@ public class GameManager : MonoBehaviour
                 topicProbs[i] = eval.GetTopicProb(t.text, trendingTopics[i]);
             }
 
+            float sum = topicProbs.Sum();
+            topicProbs = topicProbs.Select(x => x / sum).ToArray();
+
             // Sum of tweets_each
             float sum_tweets_each = 0;
             for (int i = 0; i < 3; i++)
@@ -109,13 +114,13 @@ public class GameManager : MonoBehaviour
             // Scale by days since posted (limit this to 3)
             for (int i = 0; i < 3; i++)
             {
-                per_topic_followers[i] = (int)(per_topic_followers[i] / t.daysSincePosted);
+                per_topic_followers[i] = (int)((per_topic_followers[i] / t.daysSincePosted) * dampener);
             }
 
             // Update the total number of followers in the tweet
-            t.topic1Likes += per_topic_followers[0];
-            t.topic2Likes += per_topic_followers[1];
-            t.topic3Likes += per_topic_followers[2];
+            t.topic1Likes += Mathf.RoundToInt(per_topic_followers[0]);
+            t.topic2Likes += Mathf.RoundToInt(per_topic_followers[1]);
+            t.topic3Likes += Mathf.RoundToInt(per_topic_followers[2]);
 
             //Update the total follower count
             foreach (int i in per_topic_followers)
@@ -129,8 +134,10 @@ public class GameManager : MonoBehaviour
         // TODO: Update current trending topics
         // With 1/3 probability, choose to discard a trending topic and sample a new one
         // Make sure to call Topic.degradePops() on each non discarded topic
+        foreach (Topic oldTopic in topicManager.activeTopics)
+            oldTopic.degradePops();
         topicManager.UpdateActiveTopics();
-        
+
         //Advance time by 2 hours
         datetime = datetime.AddHours(2);
         datetimeDisplay = datetime.ToString("dddd h:mm tt");

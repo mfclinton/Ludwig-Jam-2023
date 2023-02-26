@@ -36,11 +36,6 @@ public class TopicManager : MonoBehaviour
                 int newTopicIndex = UnityEngine.Random.Range(0, topicPool.Length);
                 activeTopics[i] = topicPool[newTopicIndex].Clone();
             }
-            else
-            {
-                Topic oldTopic = activeTopics[i];
-                oldTopic.degradePops();
-            }
         }
 
         OnTrendingUpdated.Invoke(activeTopics);
