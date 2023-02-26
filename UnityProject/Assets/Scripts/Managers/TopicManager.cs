@@ -33,7 +33,7 @@ public class TopicManager : MonoBehaviour
             float rng = UnityEngine.Random.value;
             if(rng < 0.33)
             {
-                int newTopicIndex = UnityEngine.Random.Range(0, activeTopics.Length);
+                int newTopicIndex = UnityEngine.Random.Range(0, topicPool.Length);
                 activeTopics[i] = topicPool[newTopicIndex].Clone();
             }
             else
