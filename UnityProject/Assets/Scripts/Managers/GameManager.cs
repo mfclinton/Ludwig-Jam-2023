@@ -56,8 +56,8 @@ public class GameManager : MonoBehaviour
         if (tweet.Length == 0)
             return;
 
-        var activeTopics = topicManager.activeTopics;
-        Tweet newTweet = new Tweet(tweetManager.currentTweet, activeTopics[0].name, activeTopics[1].name, activeTopics[2].name, datetimeDisplay);
+        Topic[] activeTopics = topicManager.activeTopics;
+        Tweet newTweet = new Tweet(tweetManager.currentTweet, activeTopics, datetimeDisplay);
         tweetQueue.Enqueue(newTweet);
         OnTweetSubmitted.Invoke(newTweet);
 
@@ -65,74 +65,18 @@ public class GameManager : MonoBehaviour
         if (tweetQueue.Count > 3)
             tweetQueue.Dequeue();
 
-        // Get the trending topics
-        Topic[] trendingTopics = topicManager.activeTopics;
-
-        // Get the number of tweets for each topic
-        int[] tweets_each = new int[3];
-        for (int i = 0; i < 3; i++)
-        {
-            tweets_each[i] = trendingTopics[i].pops;
-        }
-
         // For each tweet in the queue
+        HashSet<Topic> distinctTopics = new HashSet<Topic>();
         int totalFollowersGained = 0;
         foreach (Tweet t in tweetQueue)
         {
-            // For each topic, compute its probability given the tweet text
-            float[] topicProbs = new float[3];
-            for (int i = 0; i < 3; i++)
-            {
-                topicProbs[i] = eval.GetTopicProb(t.text, trendingTopics[i]);
-            }
-
-            // Sum of tweets_each
-            float sum_tweets_each = 0;
-            for (int i = 0; i < 3; i++)
-            {
-                sum_tweets_each += tweets_each[i];
-            }
-
-            // Normalize the tweets per topic
-            float[] relative_tweets_each = new float[3];
-            for (int i = 0; i < 3; i++)
-            {
-                relative_tweets_each[i] = tweets_each[i] / sum_tweets_each;
-            }
-
-            // Add the number of followers gained from each topic
-            int[] per_topic_followers = new int[3];
-            for (int i = 0; i < 3; i++)
-            {
-                per_topic_followers[i] = (int)(topicProbs[i] * relative_tweets_each[i] * totalFollowers);
-            }
-
-            t.daysSincePosted += 1;
-            // Scale by days since posted (limit this to 3)
-            for (int i = 0; i < 3; i++)
-            {
-                per_topic_followers[i] = (int)((per_topic_followers[i] / t.daysSincePosted) * dampener);
-            }
-
-            // Update the total number of followers in the tweet
-            t.topic1Likes += Mathf.RoundToInt(per_topic_followers[0]);
-            t.topic2Likes += Mathf.RoundToInt(per_topic_followers[1]);
-            t.topic3Likes += Mathf.RoundToInt(per_topic_followers[2]);
-
-            //Update the total follower count
-            foreach (int i in per_topic_followers)
-            {
-                totalFollowersGained += i;
-            }
-
-            t.UpdateTweetReactionUI();
+            totalFollowersGained += t.Update(eval, totalFollowers, dampener);
+            distinctTopics = distinctTopics.Concat(t.topics).ToHashSet();
         }
 
-        // TODO: Update current trending topics
-        // With 1/3 probability, choose to discard a trending topic and sample a new one
-        // Make sure to call Topic.degradePops() on each non discarded topic
-        foreach (Topic oldTopic in topicManager.activeTopics)
-            oldTopic.degradePops();
+        foreach (Topic distinctTopic in distinctTopics)
+            distinctTopic.degradePops();
+
         topicManager.UpdateActiveTopics();
 
         //Advance time by 2 hours
