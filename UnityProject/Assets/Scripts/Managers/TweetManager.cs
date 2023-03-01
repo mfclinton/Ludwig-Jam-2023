@@ -20,8 +20,7 @@ public class TweetManager : MonoBehaviour
     public event OnNewSuggestedTweetsHandler OnNewSuggestedTweets;
 
     public string currentTweet { get; private set; }
-    public int numSuggestions { get; private set; }
-    public int maxCorrectingDist { get; private set; }
+    public int numSuggestions;
 
     GPTHelper gpt;
     WordLikelihoodHelper wlh;
@@ -36,9 +35,6 @@ public class TweetManager : MonoBehaviour
         gpt = FindObjectOfType<GPTHelper>();
         wlh = FindObjectOfType<WordLikelihoodHelper>();
         topicManager = FindObjectOfType<TopicManager>();
-
-        numSuggestions = 3;
-        maxCorrectingDist = 2;
 
         ResetTweet();
     }

@@ -10,12 +10,12 @@ public class TweetUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI tweetBody;
     [SerializeField] TweetReactionUI[] tweetReactions;
 
-    public void UpdateText(string text, string datetimeDisplay, string topic1, string topic2, string topic3, int topic1Likes, int topic2Likes, int topic3Likes)
+    public void UpdateText(string text, string datetimeDisplay, Topic[] topics, int[] topicLikes)
     {
         tweetBody.text = text;
         dateField.text = datetimeDisplay;
-        tweetReactions[0].UpdateText(topic1, topic1Likes);
-        tweetReactions[1].UpdateText(topic2, topic2Likes);
-        tweetReactions[2].UpdateText(topic3, topic3Likes);
+
+        for (int i = 0; i < tweetReactions.Length; i++)
+            tweetReactions[i].UpdateText(topics[i].name, topicLikes[i]);
     }
 }
