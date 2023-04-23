@@ -91,13 +91,13 @@ public class UIManager : MonoBehaviour
         TweetUI tweetUI = post.GetComponent<TweetUI>();
         tweet.ui = tweetUI;
 
-        tweet.UpdateTweetReactionUI();
         Destroy(feedParent.GetChild(0).gameObject);
     }
 
     public void UpdateTopics(Topic[] topics)
     {
-        var orderedTopics = topics.OrderBy(t => t.pops).ToArray();
+        Topic[] orderedTopics = topics.OrderByDescending(t => t.pops).ToArray();
+
         for (int i = 0; i < topics.Length; i++)
         {
             Topic t = orderedTopics[i];
